@@ -41,11 +41,26 @@ export function SignInPage({ next }: SignInPageProps) {
     }
   };
 
-  return (
-    <NarrowFormLayout>
-      <h1 className="font-serif text-[38px] font-medium tracking-[-0.9px] text-ink">Вход в кабинет</h1>
+  const footer = (
+    <p className="text-[13px] text-ink-muted">
+      Нет аккаунта?{" "}
+      <Link
+        href={withNext(routes.signUp, next)}
+        className="font-medium text-ink-soft underline-offset-2 transition-colors duration-150 ease-out hover:text-ink hover:underline"
+      >
+        Зарегистрироваться по номеру
+      </Link>
+    </p>
+  );
 
-      <form onSubmit={submit} className="flex flex-col gap-[22px]">
+  return (
+    <NarrowFormLayout footer={footer}>
+      <div className="flex flex-col gap-2">
+        <h1 className="font-display text-[30px]/[1.1] font-medium tracking-[-0.8px] text-ink">Вход в кабинет</h1>
+        <p className="text-sm/[22px] text-ink-muted">Номер телефона и пароль — те же, что при регистрации.</p>
+      </div>
+
+      <form onSubmit={submit} className="flex flex-col gap-5">
         <TextField
           label="Номер телефона"
           type="tel"
@@ -67,30 +82,20 @@ export function SignInPage({ next }: SignInPageProps) {
 
         <div className="flex items-center justify-between gap-4">
           <Checkbox label="Запомнить меня" checked={remember} onChange={setRemember} />
-          <Link href={routes.forgotPassword} className="text-[13px] font-medium text-ink-soft hover:underline">
+          <Link
+            href={routes.forgotPassword}
+            className="press -mx-2 inline-flex items-center rounded-md px-2 py-1.5 text-[13px] font-medium text-ink-muted transition-colors duration-150 ease-out hover:bg-sunken hover:text-ink"
+          >
             Забыли пароль?
           </Link>
         </div>
 
         <FormError message={error} />
 
-        <Button type="submit" disabled={isSubmitting} className="w-full py-3.5">
+        <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
           Войти
         </Button>
       </form>
-
-      <div className="flex items-center gap-3.5 py-1">
-        <span className="h-px flex-1 bg-line" />
-        <span className="font-mono text-[10px] tracking-[1.4px] text-ink-faint">ИЛИ</span>
-        <span className="h-px flex-1 bg-line" />
-      </div>
-
-      <Link
-        href={withNext(routes.signUp, next)}
-        className="inline-flex w-full items-center justify-center rounded-md bg-surface px-5 py-3 text-sm font-medium text-ink outline outline-line-strong transition-colors hover:bg-canvas"
-      >
-        Зарегистрироваться по номеру
-      </Link>
     </NarrowFormLayout>
   );
 }

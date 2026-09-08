@@ -1,4 +1,5 @@
 export { authorizedRequest, NotAuthenticatedError } from "./authorized-request";
+export { describeError } from "./describe-error";
 export { ApiError, apiRequest } from "./http";
 export {
   clearTokens,

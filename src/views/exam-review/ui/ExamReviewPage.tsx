@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,17 +10,59 @@ import {
   fetchResults,
   fetchReview,
   type QuestionReview,
+  type ReviewOption,
 } from "@/entities/attempt";
-import { ApiError, NotAuthenticatedError } from "@/shared/api";
+import { ApiError, describeError, NotAuthenticatedError } from "@/shared/api";
 import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes } from "@/shared/config/routes";
+import { showToast } from "@/shared/lib/toast-store";
 import { cn } from "@/shared/lib/cn";
-import { SectionLabel, Surface } from "@/shared/ui";
+import { Button, SectionLabel, Spinner, Surface } from "@/shared/ui";
 
 import { buildReviewNavigation } from "../model/review-navigation";
 import { ReviewNavPanel } from "./ReviewNavPanel";
 
 const LETTERS = "ABCDEFGH";
+
+type OptionTone = "correct" | "wrong" | "neutral";
+
+const OPTION_ROW: Record<OptionTone, string> = {
+  correct: "bg-correct-soft ring-1 ring-correct/20",
+  wrong: "bg-wrong-soft ring-1 ring-wrong/20",
+  neutral: "bg-surface ring-1 ring-line",
+};
+
+const OPTION_BUBBLE: Record<OptionTone, string> = {
+  correct: "bg-correct text-white",
+  wrong: "bg-wrong text-white",
+  neutral: "bg-sunken text-ink-muted",
+};
+
+const OPTION_TEXT: Record<OptionTone, string> = {
+  correct: "text-ink",
+  wrong: "text-ink",
+  neutral: "text-ink-muted",
+};
+
+function optionTone(option: ReviewOption): OptionTone {
+  if (option.isCorrect) {
+    return "correct";
+  }
+  return option.isSelected ? "wrong" : "neutral";
+}
+
+function verdictOf(review: QuestionReview): { label: string; className: string } {
+  if (review.isCorrect === null) {
+    return { label: "Без ответа", className: "bg-sunken text-ink-muted" };
+  }
+  if (review.isCorrect) {
+    return { label: "Верно", className: "bg-correct-soft text-correct" };
+  }
+  if (review.score > 0) {
+    return { label: "Частично верно", className: "bg-flag-soft text-flag" };
+  }
+  return { label: "Неверно", className: "bg-wrong-soft text-wrong" };
+}
 
 type ExamReviewPageProps = {
   attemptId: string;
@@ -46,18 +88,13 @@ export function ExamReviewPage({ attemptId, questionId }: ExamReviewPageProps) {
         if (caught instanceof NotAuthenticatedError) {
           return;
         }
-        if (
-          caught instanceof ApiError &&
-          caught.code === "attempt_not_finished"
-        ) {
+        if (caught instanceof ApiError && caught.code === "attempt_not_finished") {
           router.replace(routes.exam(attemptId));
           return;
         }
-        setError(
-          caught instanceof ApiError
-            ? caught.message
-            : "Не удалось загрузить разбор.",
-        );
+        const message = describeError(caught, "Не удалось загрузить разбор.");
+        showToast(message);
+        setError(message);
       });
     return () => {
       cancelled = true;
@@ -66,136 +103,117 @@ export function ExamReviewPage({ attemptId, questionId }: ExamReviewPageProps) {
 
   if (!review || !results) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md items-center p-6">
-        <p className="w-full text-center text-sm text-ink-faint">
-          {error ?? "Открываем разбор…"}
-        </p>
+      <main className="mx-auto flex min-h-screen max-w-md items-center justify-center p-6">
+        {error ? (
+          <p role="alert" className="text-center text-sm text-wrong">
+            {error}
+          </p>
+        ) : (
+          <p className="flex items-center gap-2.5 text-sm text-ink-muted">
+            <Spinner className="text-ink-faint" />
+            Открываем разбор…
+          </p>
+        )}
       </main>
     );
   }
 
   const navigation = buildReviewNavigation(results, review.id);
-  const verdict =
-    review.isCorrect === null
-      ? "Без ответа"
-      : review.isCorrect
-        ? "Верно"
-        : review.score > 0
-          ? "Частично верно"
-          : "Неверно";
+  const verdict = verdictOf(review);
 
   return (
     <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-5 px-5 py-6 lg:px-10">
       <Link
         href={routes.examResults(attemptId)}
-        className="flex w-fit items-center gap-[7px] text-[13px] font-medium text-ink-muted hover:text-ink-soft"
+        className="flex w-fit items-center gap-2 text-[13px] font-medium text-ink-muted transition-colors duration-150 ease-out hover:text-ink"
       >
         <ArrowLeft className="size-[15px]" aria-hidden />К результатам
       </Link>
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <Surface as="article" className="flex flex-col gap-6 p-5 sm:p-9">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+        <div className="flex min-w-0 flex-1 flex-col gap-5">
+          <Surface as="article" className="flex flex-col gap-6 p-5 sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <SectionLabel>
-                {navigation.section?.subject.name[UI_LANGUAGE] ?? "Вопрос"} ·
-                Вопрос {review.number}
+                {navigation.section?.subject.name[UI_LANGUAGE] ?? "Вопрос"} · Вопрос {review.number}
               </SectionLabel>
-              <span className="font-mono text-xs text-ink-muted">
-                {verdict} · {review.score} / {review.maxScore}
-              </span>
-            </div>
-
-            <p className="text-[17px]/[27px] text-ink sm:text-[19px]/[29px]">
-              {review.text}
-            </p>
-
-            <ul className="flex flex-col gap-2.5">
-              {review.options.map((option, index) => (
-                <li
-                  key={option.id}
+              <div className="flex items-center gap-2.5">
+                <span
                   className={cn(
-                    "flex items-center gap-3.5 rounded-md px-[18px] py-4",
-                    option.isCorrect
-                      ? "bg-surface outline-2 outline-ink-soft"
-                      : option.isSelected
-                        ? "bg-sunken outline outline-line-strong"
-                        : "bg-surface outline outline-line",
+                    "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium",
+                    verdict.className,
                   )}
                 >
-                  <span
-                    className={cn(
-                      "flex size-7 shrink-0 items-center justify-center rounded-full font-mono text-xs font-medium",
-                      option.isCorrect
-                        ? "bg-ink-soft text-surface"
-                        : "bg-canvas text-ink-muted",
-                    )}
+                  {verdict.label}
+                </span>
+                <span className="text-[13px] text-ink-muted">
+                  {review.score}
+                  <span className="text-ink-faint"> / {review.maxScore}</span>
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[17px]/[27px] text-ink sm:text-[19px]/[29px]">{review.text}</p>
+
+            <ul className="flex flex-col gap-2">
+              {review.options.map((option, index) => {
+                const tone = optionTone(option);
+                return (
+                  <li
+                    key={option.id}
+                    className={cn("flex items-center gap-3.5 rounded-md px-4 py-3.5", OPTION_ROW[tone])}
                   >
-                    {LETTERS[index] ?? index + 1}
-                  </span>
-                  <span
-                    className={cn(
-                      "flex-1 text-[15px]",
-                      option.isCorrect || option.isSelected
-                        ? "text-ink"
-                        : "text-ink-muted",
-                    )}
-                  >
-                    {option.text}
-                  </span>
-                  {option.isCorrect ? (
-                    <span className="flex items-center gap-1 font-mono text-[11px] text-ink-soft">
-                      <Check className="size-3.5" aria-hidden />
-                      верный
+                    <span
+                      className={cn(
+                        "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-medium",
+                        OPTION_BUBBLE[tone],
+                      )}
+                    >
+                      {LETTERS[index] ?? index + 1}
                     </span>
-                  ) : option.isSelected ? (
-                    <span className="flex items-center gap-1 font-mono text-[11px] text-ink-faint">
-                      <X className="size-3.5" aria-hidden />
-                      ваш ответ
-                    </span>
-                  ) : null}
-                  {option.isCorrect && option.isSelected ? (
-                    <span className="font-mono text-[11px] text-ink-faint">
-                      · ваш ответ
-                    </span>
-                  ) : null}
-                </li>
-              ))}
+                    <span className={cn("flex-1 text-[15px]/[22px]", OPTION_TEXT[tone])}>{option.text}</span>
+                    {tone === "correct" ? (
+                      <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-correct">
+                        <Check className="size-3.5" aria-hidden />
+                        {option.isSelected ? "верный · ваш ответ" : "верный"}
+                      </span>
+                    ) : null}
+                    {tone === "wrong" ? (
+                      <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-wrong">
+                        <X className="size-3.5" aria-hidden />
+                        ваш ответ
+                      </span>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
 
-            <div className="flex flex-col gap-2 border-t border-line pt-5">
+            <div className="flex flex-col gap-2 rounded-md bg-sunken p-4 sm:p-5">
               <SectionLabel>Разбор</SectionLabel>
               {review.explanation ? (
-                <p className="text-[15px]/[24px] whitespace-pre-line text-ink">
-                  {review.explanation}
-                </p>
+                <p className="text-[15px]/[24px] whitespace-pre-line text-ink-soft">{review.explanation}</p>
               ) : (
-                <p className="text-sm text-ink-faint">
-                  Разбор к этому вопросу ещё не добавлен.
-                </p>
+                <p className="text-sm text-ink-faint">Разбор к этому вопросу ещё не добавлен.</p>
               )}
             </div>
           </Surface>
 
-          <nav className="flex flex-wrap items-center justify-between gap-3">
-            <NavLink
+          <nav className="flex flex-wrap items-center justify-between gap-2.5">
+            <ReviewNavButton
               attemptId={attemptId}
               targetId={navigation.previousId}
-              label="← Предыдущий"
+              label="Предыдущий"
+              variant="secondary"
+              direction="back"
             />
-            <div className="flex gap-3">
-              <NavLink
-                attemptId={attemptId}
-                targetId={navigation.nextWrongId}
-                label="Следующая ошибка →"
-                primary
-              />
-              <NavLink
-                attemptId={attemptId}
-                targetId={navigation.nextId}
-                label="Следующий →"
-              />
-            </div>
+            <ReviewNavButton
+              attemptId={attemptId}
+              targetId={navigation.nextId}
+              label="Следующий"
+              variant="secondary"
+              direction="forward"
+            />
           </nav>
         </div>
 
@@ -210,33 +228,30 @@ export function ExamReviewPage({ attemptId, questionId }: ExamReviewPageProps) {
   );
 }
 
-function NavLink({
+function ReviewNavButton({
   attemptId,
   targetId,
   label,
-  primary = false,
+  variant,
+  direction,
 }: {
   attemptId: string;
   targetId: number | null;
   label: string;
-  primary?: boolean;
+  variant: "primary" | "secondary";
+  direction: "back" | "forward";
 }) {
-  const classes = cn(
-    "inline-flex items-center justify-center rounded-md px-5 py-3 text-sm font-medium transition-colors",
-    primary
-      ? "bg-ink-soft text-surface hover:bg-ink"
-      : "bg-surface text-ink outline outline-line-strong hover:bg-canvas",
-  );
-  if (targetId === null) {
-    return (
-      <span className={cn(classes, "cursor-not-allowed opacity-40")}>
-        {label}
-      </span>
-    );
-  }
-  return (
-    <Link href={routes.examReview(attemptId, targetId)} className={classes}>
+  const button = (
+    <Button variant={variant} disabled={targetId === null}>
+      {direction === "back" ? <ArrowLeft className="size-4" aria-hidden /> : null}
       {label}
-    </Link>
+      {direction === "forward" ? <ArrowRight className="size-4" aria-hidden /> : null}
+    </Button>
   );
+
+  if (targetId === null) {
+    return button;
+  }
+
+  return <Link href={routes.examReview(attemptId, targetId)}>{button}</Link>;
 }

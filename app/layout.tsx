@@ -1,24 +1,21 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter, Newsreader } from "next/font/google";
+import { Geologica, Golos_Text } from "next/font/google";
+
+import { ToastViewport } from "@/shared/ui";
 
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-inter",
+const golosText = Golos_Text({
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "500", "600"],
+  variable: "--font-golos-text",
   display: "swap",
 });
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  display: "swap",
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
+const geologica = Geologica({
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "500", "600"],
+  variable: "--font-geologica",
   display: "swap",
 });
 
@@ -29,8 +26,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${newsreader.variable} ${plexMono.variable}`}>
-      <body>{children}</body>
+    <html lang="ru" className={`${golosText.variable} ${geologica.variable}`}>
+      <body>
+        {children}
+        <ToastViewport />
+      </body>
     </html>
   );
 }

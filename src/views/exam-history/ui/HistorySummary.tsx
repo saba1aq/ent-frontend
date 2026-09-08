@@ -17,37 +17,27 @@ export function HistorySummary({ summary }: HistorySummaryProps) {
     },
     {
       label: "Средний балл",
-      value:
-        summary.averageScore === null ? dash : String(summary.averageScore),
+      value: summary.averageScore === null ? dash : String(summary.averageScore),
     },
     {
       label: "Средняя точность",
-      value:
-        summary.averageAccuracyPercent === null
-          ? dash
-          : `${summary.averageAccuracyPercent}%`,
+      value: summary.averageAccuracyPercent === null ? dash : `${summary.averageAccuracyPercent}%`,
     },
     {
       label: "Всего за тестами",
-      value: summary.totalTimeSpentSeconds
-        ? formatHoursMinutes(summary.totalTimeSpentSeconds)
-        : dash,
+      value: summary.totalTimeSpentSeconds ? formatHoursMinutes(summary.totalTimeSpentSeconds) : dash,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="animate-enter grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {tiles.map((tile) => (
-        <Surface key={tile.label} className="flex flex-col gap-2 px-4 py-3.5">
-          <SectionLabel>{tile.label}</SectionLabel>
-          <p className="font-mono text-2xl text-ink">
+        <Surface key={tile.label} className="flex flex-col gap-2 px-4 py-4">
+          <p className="font-display text-[28px] leading-none font-medium tracking-[-0.8px] text-ink-strong">
             {tile.value}
-            {tile.suffix ? (
-              <span className="ml-1.5 text-base text-ink-faint">
-                {tile.suffix}
-              </span>
-            ) : null}
+            {tile.suffix ? <span className="text-[15px] tracking-[-0.2px] text-ink-faint"> {tile.suffix}</span> : null}
           </p>
+          <SectionLabel>{tile.label}</SectionLabel>
         </Surface>
       ))}
     </div>

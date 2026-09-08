@@ -3,28 +3,24 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import {
-  type AttemptHistory,
-  type AttemptHistoryItem,
-  fetchAttemptHistory,
-} from "@/entities/attempt";
-import { ApiError, NotAuthenticatedError } from "@/shared/api";
+import { type AttemptHistory, type AttemptHistoryItem, fetchAttemptHistory } from "@/entities/attempt";
+import { fetchStreak, type Streak, StreakCard } from "@/entities/streak";
+import { describeError, NotAuthenticatedError } from "@/shared/api";
 import { routes } from "@/shared/config/routes";
 import { pluralize } from "@/shared/lib/format";
-import { Button, Surface } from "@/shared/ui";
+import { showToast } from "@/shared/lib/toast-store";
+import { Button, SectionLabel, Spinner, Surface } from "@/shared/ui";
 
 import { AttemptsTable } from "./AttemptsTable";
 import { HistorySummary } from "./HistorySummary";
 
-function describeError(caught: unknown, fallback: string): string {
-  return caught instanceof ApiError ? caught.message : fallback;
-}
 
 export function ExamHistoryPage() {
   const [history, setHistory] = useState<AttemptHistory | null>(null);
   const [items, setItems] = useState<AttemptHistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [streak, setStreak] = useState<Streak | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,8 +35,17 @@ export function ExamHistoryPage() {
         if (caught instanceof NotAuthenticatedError) {
           return;
         }
-        setError(describeError(caught, "Не удалось загрузить пробники."));
+        const message = describeError(caught, "Не удалось загрузить пробники.");
+        showToast(message);
+        setError(message);
       });
+    fetchStreak()
+      .then((loaded) => {
+        if (!cancelled) {
+          setStreak(loaded);
+        }
+      })
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
@@ -57,14 +62,13 @@ export function ExamHistoryPage() {
       setHistory(next);
       setItems((current) => {
         const known = new Set(current.map((item) => item.id));
-        return [
-          ...current,
-          ...next.items.filter((item) => !known.has(item.id)),
-        ];
+        return [...current, ...next.items.filter((item) => !known.has(item.id))];
       });
     } catch (caught) {
       if (!(caught instanceof NotAuthenticatedError)) {
-        setError(describeError(caught, "Не удалось загрузить ещё."));
+        const message = describeError(caught, "Не удалось загрузить ещё.");
+        showToast(message);
+        setError(message);
       }
     } finally {
       setIsLoadingMore(false);
@@ -73,10 +77,17 @@ export function ExamHistoryPage() {
 
   if (!history) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md items-center p-6">
-        <p className="w-full text-center text-sm text-ink-faint">
-          {error ?? "Загружаем пробники…"}
-        </p>
+      <main className="mx-auto flex min-h-screen max-w-md items-center justify-center p-6">
+        {error ? (
+          <p role="alert" className="text-center text-sm text-wrong">
+            {error}
+          </p>
+        ) : (
+          <p className="flex items-center gap-2.5 text-sm text-ink-muted">
+            <Spinner className="text-ink-faint" />
+            Загружаем пробники…
+          </p>
+        )}
       </main>
     );
   }
@@ -85,61 +96,60 @@ export function ExamHistoryPage() {
   const hasMore = items.length < history.totalCount;
 
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-5 py-6 lg:px-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-serif text-[32px] font-medium tracking-[-0.8px] text-ink lg:text-4xl">
-          Мои пробники
-        </h1>
-        {active === null ? (
-          <Link
-            href={routes.examSetup}
-            className="text-[13px] font-medium text-ink-soft hover:underline"
-          >
-            Собрать новый вариант →
-          </Link>
-        ) : (
-          <Link
-            href={routes.exam(active)}
-            className="text-[13px] font-medium text-ink-soft hover:underline"
-          >
-            Продолжить текущий экзамен →
-          </Link>
-        )}
+    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-5 py-8 lg:px-10">
+      <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+        <div className="flex flex-col gap-2">
+          <SectionLabel>История</SectionLabel>
+          <h1 className="font-display text-[32px] leading-none font-medium tracking-[-0.9px] text-ink-strong lg:text-[40px]">
+            Мои пробники
+          </h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button as={Link} href={routes.leaderboard} variant="secondary">
+            Рейтинг
+          </Button>
+          {active === null ? (
+            <Button as={Link} href={routes.examSetup}>
+              Собрать новый вариант
+            </Button>
+          ) : (
+            <Button as={Link} href={routes.exam(active)}>
+              Продолжить текущий экзамен
+            </Button>
+          )}
+        </div>
       </header>
+
+      {streak ? <StreakCard streak={streak} /> : null}
 
       <HistorySummary summary={history.summary} />
 
       {items.length === 0 ? (
-        <Surface className="flex flex-col items-start gap-4 p-6 sm:p-9">
-          <p className="max-w-[520px] text-base text-ink">
-            Пока ни одного пробника. Соберите вариант — три обязательных
-            предмета уже в нём, останется выбрать два профильных.
+        <Surface className="flex flex-col items-start gap-5 p-6 sm:p-9">
+          <p className="max-w-[520px] text-base/7 text-ink-soft">
+            Пока ни одного пробника. Соберите вариант — три обязательных предмета уже в нём, останется выбрать два
+            профильных.
           </p>
-          <Link href={routes.examSetup}>
-            <Button>Собрать вариант</Button>
-          </Link>
+          <Button as={Link} href={routes.examSetup} size="lg">
+            Собрать вариант
+          </Button>
         </Surface>
       ) : (
         <>
           <AttemptsTable items={items} />
           <footer className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-[13px] text-ink-faint">
-              {items.length === 1 ? "Показана" : "Показаны"} {items.length} из{" "}
-              {history.totalCount}{" "}
+              {items.length === 1 ? "Показана" : "Показаны"} {items.length} из {history.totalCount}{" "}
               {pluralize(history.totalCount, ["попытки", "попыток", "попыток"])}
             </p>
             {hasMore ? (
-              <Button
-                variant="secondary"
-                onClick={loadMore}
-                disabled={isLoadingMore}
-              >
-                {isLoadingMore ? "Загружаем…" : "Показать ещё"}
+              <Button variant="secondary" onClick={loadMore} loading={isLoadingMore}>
+                Показать ещё
               </Button>
             ) : null}
           </footer>
           {error ? (
-            <p role="alert" className="text-[13px] text-ink-soft">
+            <p role="alert" className="text-[13px] text-wrong">
               {error}
             </p>
           ) : null}

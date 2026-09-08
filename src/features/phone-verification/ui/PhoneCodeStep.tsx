@@ -52,10 +52,14 @@ export function PhoneCodeStep({ phone, purpose, request, onVerified, onChangePho
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-[18px]">
+    <form onSubmit={submit} className="flex flex-col gap-5">
       <p className="text-sm/[22px] text-ink-muted">
         Код отправлен на <span className="font-medium text-ink">{current.phone}</span>.{" "}
-        <button type="button" onClick={onChangePhone} className="cursor-pointer font-medium text-ink-soft underline-offset-2 hover:underline">
+        <button
+          type="button"
+          onClick={onChangePhone}
+          className="cursor-pointer font-medium text-ink-soft underline-offset-2 transition-colors duration-150 ease-out hover:text-ink hover:underline"
+        >
           Изменить номер
         </button>
       </p>
@@ -69,22 +73,18 @@ export function PhoneCodeStep({ phone, purpose, request, onVerified, onChangePho
         onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 8))}
         hint={current.debugCode ? `Код для разработки: ${current.debugCode}` : "Код действует 5 минут."}
         required
+        className="[&_input]:text-[22px] [&_input]:font-medium [&_input]:tracking-[0.34em]"
       />
 
       <FormError message={error} />
 
-      <Button type="submit" disabled={isBusy || code.length < 4} className="w-full py-3.5">
-        Подтвердить
-      </Button>
-
-      <div className="text-center text-[13px] text-ink-faint">
-        {resendIn > 0 ? (
-          <span>Отправить код повторно через {resendIn} с</span>
-        ) : (
-          <button type="button" onClick={resend} disabled={isBusy} className="cursor-pointer font-medium text-ink-soft hover:underline">
-            Отправить код повторно
-          </button>
-        )}
+      <div className="flex flex-col items-center gap-1">
+        <Button type="submit" size="lg" loading={isBusy} disabled={code.length < 4} className="w-full">
+          Подтвердить
+        </Button>
+        <Button variant="quiet" size="sm" onClick={resend} disabled={isBusy || resendIn > 0}>
+          {resendIn > 0 ? `Отправить код повторно через ${resendIn} с` : "Отправить код повторно"}
+        </Button>
       </div>
     </form>
   );

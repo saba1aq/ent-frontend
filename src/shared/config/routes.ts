@@ -2,6 +2,7 @@ export const routes = {
   home: "/",
   examSetup: "/exam/setup",
   exams: "/exams",
+  leaderboard: "/leaderboard",
   signIn: "/auth/sign-in",
   signUp: "/auth/sign-up",
   forgotPassword: "/auth/forgot-password",

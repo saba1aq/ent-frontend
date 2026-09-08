@@ -13,8 +13,9 @@ import {
   saveAnswer,
   toggleFlag,
 } from "@/entities/attempt";
-import { ApiError, NotAuthenticatedError } from "@/shared/api";
+import { ApiError, describeError, NotAuthenticatedError } from "@/shared/api";
 import { routes } from "@/shared/config/routes";
+import { showToast } from "@/shared/lib/toast-store";
 
 const CLOSED_CODES = new Set(["attempt_expired", "attempt_not_active"]);
 
@@ -56,17 +57,25 @@ function patchOverview(
   };
 }
 
+function neighbourIds(flat: FlatQuestion[], currentId: number): number[] {
+  const index = flat.findIndex((question) => question.id === currentId);
+  if (index < 0) {
+    return [];
+  }
+  return [flat[index + 1], flat[index - 1], flat[index + 2]].filter((question) => question !== undefined).map((question) => question.id);
+}
+
 export function useExamRun(attemptId: string) {
   const router = useRouter();
   const [overview, setOverview] = useState<AttemptOverview | null>(null);
   const [details, setDetails] = useState<Record<number, QuestionDetail>>({});
   const [currentId, setCurrentId] = useState<number | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
   const [overviewMode, setOverviewMode] = useState<"closed" | "review" | "finish">("closed");
   const clockOffsetRef = useRef(0);
   const enteredAtRef = useRef<number>(0);
+  const prefetchingRef = useRef<Set<number>>(new Set());
   const finishingRef = useRef(false);
 
   const goToResults = useCallback(() => router.replace(routes.examResults(attemptId)), [router, attemptId]);
@@ -80,7 +89,7 @@ export function useExamRun(attemptId: string) {
         goToResults();
         return;
       }
-      setError(caught instanceof ApiError ? caught.message : "Что-то пошло не так. Проверьте соединение.");
+      showToast(describeError(caught, "Не удалось сохранить действие. Проверьте соединение."));
     },
     [goToResults],
   );
@@ -176,6 +185,29 @@ export function useExamRun(attemptId: string) {
   const flat = useMemo(() => (overview ? flatten(overview) : []), [overview]);
   const currentIndex = flat.findIndex((question) => question.id === currentId);
   const currentDetail = currentId !== null ? details[currentId] : undefined;
+
+  useEffect(() => {
+    if (currentId === null || !details[currentId] || !overview) {
+      return;
+    }
+    const sectionEntryIds = overview.sections.map((section) => section.questions[0]?.id).filter((id) => id !== undefined);
+    const wanted = [...neighbourIds(flat, currentId), ...sectionEntryIds];
+    const missing = wanted.filter((id) => !details[id] && !prefetchingRef.current.has(id));
+    if (missing.length === 0) {
+      return;
+    }
+    for (const id of missing) {
+      prefetchingRef.current.add(id);
+      fetchQuestion(attemptId, id)
+        .then((detail) => {
+          setDetails((previous) => (previous[detail.id] ? previous : { ...previous, [detail.id]: detail }));
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          prefetchingRef.current.delete(id);
+        });
+    }
+  }, [attemptId, currentId, details, flat, overview]);
   const currentSection = overview?.sections.find((section) => section.id === currentDetail?.sectionId)
     ?? overview?.sections.find((section) => section.questions.some((question) => question.id === currentId));
 
@@ -190,7 +222,9 @@ export function useExamRun(attemptId: string) {
         ? wasSelected
           ? currentDetail.selectedOptionIds.filter((id) => id !== optionId)
           : [...currentDetail.selectedOptionIds, optionId]
-        : [optionId];
+        : wasSelected
+          ? []
+          : [optionId];
 
       setDetails((previous) => ({ ...previous, [currentDetail.id]: { ...currentDetail, selectedOptionIds: nextSelection } }));
       setOverview((previous) => (previous ? patchOverview(previous, currentDetail.id, { isAnswered: nextSelection.length > 0 }) : previous));
@@ -238,7 +272,6 @@ export function useExamRun(attemptId: string) {
     previousId: currentIndex > 0 ? flat[currentIndex - 1].id : null,
     nextId: currentIndex >= 0 && currentIndex < flat.length - 1 ? flat[currentIndex + 1].id : null,
     remainingSeconds,
-    error,
     isFinishing,
     overviewMode,
     openOverview,
@@ -248,6 +281,5 @@ export function useExamRun(attemptId: string) {
     selectOption,
     flag,
     finish,
-    dismissError: () => setError(null),
   };
 }
