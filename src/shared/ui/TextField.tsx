@@ -15,14 +15,14 @@ export function TextField({ label, hint, error, suffix, className, ...inputProps
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
 
   return (
-    <div className={cn("flex flex-col gap-[7px]", className)}>
-      <label htmlFor={id} className="text-[13px] font-medium text-ink">
+    <div className={cn("flex flex-col gap-2", className)}>
+      <label htmlFor={id} className="text-[13px] font-medium text-ink-soft">
         {label}
       </label>
       <div
         className={cn(
-          "flex h-12 items-center gap-2.5 rounded-md bg-surface px-3.5 outline transition-colors focus-within:outline-ink",
-          error ? "outline-ink-soft" : "outline-line-strong",
+          "flex h-12 items-center gap-2.5 rounded-md bg-surface px-3.5 ring-1 transition-[box-shadow,background-color] duration-150 ease-out focus-within:ring-2",
+          error ? "ring-wrong focus-within:ring-wrong" : "ring-line-strong focus-within:ring-accent",
         )}
       >
         <input
@@ -35,7 +35,7 @@ export function TextField({ label, hint, error, suffix, className, ...inputProps
         {suffix}
       </div>
       {error ? (
-        <p id={`${id}-error`} className="text-xs text-ink-soft">
+        <p id={`${id}-error`} className="text-xs text-wrong">
           {error}
         </p>
       ) : hint ? (

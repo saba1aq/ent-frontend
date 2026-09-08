@@ -1,7 +1,6 @@
 "use client";
 
-import { FormError } from "@/shared/ui";
-
+import { UI_LANGUAGE } from "@/shared/config/language";
 import { useExamRun } from "../model/use-exam-run";
 import { AnswersOverviewModal } from "./AnswersOverviewModal";
 import { NavPanel } from "./NavPanel";
@@ -17,21 +16,18 @@ export function ExamRunPage({ attemptId }: ExamRunPageProps) {
   if (!exam.overview) {
     return (
       <main className="mx-auto flex min-h-screen max-w-md items-center p-6">
-        <p className="w-full text-center text-sm text-ink-faint">{exam.error ?? "Загружаем вариант…"}</p>
+        <p className="w-full text-center text-sm text-ink-faint">Загружаем вариант…</p>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-stretch">
+    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-start">
       <div className="flex min-w-0 flex-1 flex-col gap-3">
-        {exam.error ? (
-          <button type="button" onClick={exam.dismissError} className="cursor-pointer text-left">
-            <FormError message={exam.error} />
-          </button>
-        ) : null}
         <QuestionPanel
           detail={exam.currentDetail}
+          sectionName={exam.currentSection?.subject.shortName[UI_LANGUAGE]}
+          sectionQuestionCount={exam.currentSection?.questionCount}
           hasPrevious={exam.previousId !== null}
           hasNext={exam.nextId !== null}
           isFinishing={exam.isFinishing}

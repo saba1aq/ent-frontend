@@ -1,8 +1,13 @@
 export { Button } from "./Button";
 export { Checkbox } from "./Checkbox";
 export { FormError } from "./FormError";
+export { Modal } from "./Modal";
+export { NarrowFormLayout } from "./NarrowFormLayout";
 export { PasswordField } from "./PasswordField";
 export { SectionLabel } from "./SectionLabel";
+export { Segmented } from "./Segmented";
+export { SelectBubble } from "./SelectBubble";
+export { Spinner } from "./Spinner";
 export { Surface } from "./Surface";
+export { ToastViewport } from "./ToastViewport";
 export { TextField } from "./TextField";
-export { NarrowFormLayout } from "./NarrowFormLayout";

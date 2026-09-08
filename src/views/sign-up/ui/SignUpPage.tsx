@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,13 +10,21 @@ import { PhoneCodeStep } from "@/features/phone-verification";
 import { ApiError } from "@/shared/api";
 import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes, withNext } from "@/shared/config/routes";
-import { Button, FormError, NarrowFormLayout, PasswordField, TextField } from "@/shared/ui";
+import { Button, FormError, NarrowFormLayout, PasswordField, SectionLabel, TextField } from "@/shared/ui";
 
 type SignUpPageProps = {
   next: string;
 };
 
 type Step = { name: "phone" } | { name: "code"; request: CodeRequestResult } | { name: "password"; token: string };
+
+const STEP_NUMBERS: Record<Step["name"], number> = { phone: 1, code: 2, password: 3 };
+
+const STEP_SUBTITLES: Record<Step["name"], string | null> = {
+  phone: "Укажите номер телефона — отправим SMS с кодом подтверждения.",
+  code: null,
+  password: "Номер подтверждён. Придумайте пароль для входа.",
+};
 
 export function SignUpPage({ next }: SignUpPageProps) {
   const router = useRouter();
@@ -54,17 +63,28 @@ export function SignUpPage({ next }: SignUpPageProps) {
     }
   };
 
+  const subtitle = STEP_SUBTITLES[step.name];
+
   return (
     <NarrowFormLayout>
-      <Link href={withNext(routes.signIn, next)} className="text-[13px] font-medium text-ink-muted hover:text-ink-soft">
-        ← Ко входу
-      </Link>
+      <div className="flex flex-col gap-3">
+        <Link
+          href={withNext(routes.signIn, next)}
+          className="press -mx-2 -mt-1.5 inline-flex w-fit items-center gap-[7px] rounded-md px-2 py-1.5 text-[13px] font-medium text-ink-muted transition-colors duration-150 ease-out hover:bg-sunken hover:text-ink"
+        >
+          <ArrowLeft className="size-[15px]" aria-hidden />
+          Ко входу
+        </Link>
 
-      <h1 className="font-serif text-[38px] font-medium tracking-[-0.9px] text-ink">Регистрация</h1>
+        <div className="flex flex-col gap-2">
+          <SectionLabel>Шаг {STEP_NUMBERS[step.name]} из 3</SectionLabel>
+          <h1 className="font-display text-[30px]/[1.1] font-medium tracking-[-0.8px] text-ink">Регистрация</h1>
+          {subtitle ? <p className="text-sm/[22px] text-ink-muted">{subtitle}</p> : null}
+        </div>
+      </div>
 
       {step.name === "phone" ? (
-        <form onSubmit={requestCode} className="flex flex-col gap-[18px]">
-          <p className="text-sm/[22px] text-ink-muted">Укажите номер телефона — отправим SMS с кодом подтверждения.</p>
+        <form onSubmit={requestCode} className="flex flex-col gap-5">
           <TextField
             label="Номер телефона"
             type="tel"
@@ -77,7 +97,7 @@ export function SignUpPage({ next }: SignUpPageProps) {
             required
           />
           <FormError message={error} />
-          <Button type="submit" disabled={isBusy} className="w-full py-3.5">
+          <Button type="submit" size="lg" loading={isBusy} className="w-full">
             Отправить код
           </Button>
         </form>
@@ -94,8 +114,7 @@ export function SignUpPage({ next }: SignUpPageProps) {
       ) : null}
 
       {step.name === "password" ? (
-        <form onSubmit={complete} className="flex flex-col gap-[18px]">
-          <p className="text-sm/[22px] text-ink-muted">Номер подтверждён. Придумайте пароль для входа.</p>
+        <form onSubmit={complete} className="flex flex-col gap-5">
           <PasswordField
             label="Пароль"
             autoComplete="new-password"
@@ -106,7 +125,7 @@ export function SignUpPage({ next }: SignUpPageProps) {
             required
           />
           <FormError message={error} />
-          <Button type="submit" disabled={isBusy || password.length < 8} className="w-full py-3.5">
+          <Button type="submit" size="lg" loading={isBusy} disabled={password.length < 8} className="w-full">
             Создать аккаунт
           </Button>
         </form>

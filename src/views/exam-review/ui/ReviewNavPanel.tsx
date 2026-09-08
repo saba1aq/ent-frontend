@@ -1,11 +1,17 @@
-import { X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { AnswerStatusCell, type AttemptResults, type SectionResult } from "@/entities/attempt";
+import { type AnswerStatus, AnswerStatusCell, type AttemptResults, type SectionResult } from "@/entities/attempt";
 import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/cn";
 import { SectionLabel, Surface } from "@/shared/ui";
+
+const LEGEND: Array<{ status: AnswerStatus; label: string; swatch: string }> = [
+  { status: "correct", label: "Верно", swatch: "bg-correct-soft ring-1 ring-correct/20" },
+  { status: "wrong", label: "Неверно", swatch: "bg-wrong-soft ring-1 ring-wrong/20" },
+  { status: "empty", label: "Без ответа", swatch: "bg-surface ring-1 ring-line" },
+];
 
 type ReviewNavPanelProps = {
   attemptId: string;
@@ -16,15 +22,16 @@ type ReviewNavPanelProps = {
 
 export function ReviewNavPanel({ attemptId, results, currentSection, currentQuestionId }: ReviewNavPanelProps) {
   return (
-    <Surface as="aside" className="flex w-full flex-col gap-[22px] p-[22px] lg:w-[320px] lg:shrink-0">
-      <div className="flex items-center justify-between gap-3">
+    <Surface as="aside" className="flex w-full flex-col gap-6 p-5 lg:w-[320px] lg:shrink-0">
+      <div className="flex flex-col gap-2">
         <SectionLabel>Результат</SectionLabel>
-        <span className="font-mono text-sm text-ink">
-          {results.totalScore} <span className="text-ink-faint">/ {results.maxScore}</span>
+        <span className="font-display text-[34px] leading-none font-medium tracking-[-1px] text-ink-strong">
+          {results.totalScore}
+          <span className="text-[17px] tracking-[-0.3px] text-ink-faint"> / {results.maxScore}</span>
         </span>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-0.5">
         <SectionLabel className="mb-2">Блоки теста</SectionLabel>
         {results.sections.map((section) => {
           const isCurrent = section.id === currentSection?.id;
@@ -34,14 +41,14 @@ export function ReviewNavPanel({ attemptId, results, currentSection, currentQues
               href={routes.examReview(attemptId, section.answers[0]?.id ?? currentQuestionId)}
               aria-current={isCurrent ? "true" : undefined}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 py-2.5 transition-colors",
-                isCurrent ? "bg-sunken outline outline-ink-soft" : "hover:bg-canvas",
+                "press flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors duration-150 ease-out",
+                isCurrent ? "bg-accent-soft" : "hover:bg-sunken",
               )}
             >
-              <span className={cn("flex-1 truncate text-[13px]", isCurrent ? "font-medium text-ink" : "text-ink-muted")}>
+              <span className={cn("flex-1 truncate text-[13px]", isCurrent ? "font-medium text-accent" : "text-ink-soft")}>
                 {section.subject.shortName[UI_LANGUAGE]}
               </span>
-              <span className={cn("font-mono text-[11px]", isCurrent ? "text-ink-soft" : "text-ink-faint")}>
+              <span className={cn("text-xs", isCurrent ? "text-accent" : "text-ink-faint")}>
                 {section.correctCount}/{section.questionCount}
               </span>
             </Link>
@@ -50,9 +57,10 @@ export function ReviewNavPanel({ attemptId, results, currentSection, currentQues
       </div>
 
       {currentSection ? (
-        <div className="flex flex-col gap-2.5 border-t border-line pt-[18px]">
+        <div className="flex flex-col gap-3 border-t border-line pt-5">
           <SectionLabel>
-            {currentSection.subject.shortName[UI_LANGUAGE]} · {currentSection.correctCount} из {currentSection.questionCount} верно
+            {currentSection.subject.shortName[UI_LANGUAGE]} · {currentSection.correctCount} из{" "}
+            {currentSection.questionCount} верно
           </SectionLabel>
           <div className="grid grid-cols-7 gap-1.5">
             {currentSection.answers.map((answer) => (
@@ -65,28 +73,27 @@ export function ReviewNavPanel({ attemptId, results, currentSection, currentQues
               />
             ))}
           </div>
+
+          <ul className="flex flex-col gap-2.5 border-t border-line pt-4 text-[13px] text-ink-muted">
+            {LEGEND.map((item) => (
+              <li key={item.status} className="flex items-center gap-2.5">
+                <span className={cn("size-3.5 rounded-[4px]", item.swatch)} aria-hidden />
+                <span className="flex-1">{item.label}</span>
+                <span className="text-ink-soft">
+                  {currentSection.answers.filter((answer) => answer.status === item.status).length}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
 
-      <ul className="flex flex-col gap-2 border-t border-line pt-4 text-xs text-ink-muted">
-        <li className="flex items-center gap-[9px]">
-          <span className="size-3.5 rounded-[3px] bg-surface outline outline-line-strong" aria-hidden />
-          Верно
-        </li>
-        <li className="flex items-center gap-[9px]">
-          <span className="flex size-3.5 items-center justify-center rounded-[3px] bg-ink" aria-hidden>
-            <X className="size-2.5 text-surface" />
-          </span>
-          Неверно
-        </li>
-        <li className="flex items-center gap-[9px]">
-          <span className="size-3.5 rounded-[3px] bg-canvas outline outline-line-strong" aria-hidden />
-          Без ответа
-        </li>
-      </ul>
-
-      <Link href={routes.examResults(attemptId)} className="text-center text-[13px] font-medium text-ink-soft hover:underline">
+      <Link
+        href={routes.examResults(attemptId)}
+        className="mt-auto flex items-center gap-1.5 text-[13px] font-medium text-ink-soft transition-colors duration-150 ease-out hover:text-accent"
+      >
         К таблице результатов
+        <ArrowRight className="size-3.5" aria-hidden />
       </Link>
     </Surface>
   );

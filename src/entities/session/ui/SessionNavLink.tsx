@@ -18,7 +18,7 @@ export function SessionNavLink({
 }: SessionNavLinkProps) {
   const status = useSessionStatus();
   const classes = cn(
-    "text-[13px] font-medium text-ink-soft hover:underline",
+    "press -mx-2 inline-flex w-fit items-center rounded-md px-2 py-1.5 text-[13px] font-medium text-ink-soft transition-colors duration-150 ease-out hover:bg-sunken hover:text-ink",
     className,
   );
 

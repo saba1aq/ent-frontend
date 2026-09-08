@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #f4f4f4;
+  --color-canvas: #f6f6f7;
   --color-surface: #ffffff;
-  --color-sunken: #ebebeb;
-  --color-line: #e2e2e2;
-  --color-line-strong: #bdbdbd;
-  --color-ink: #1a1a1a;
-  --color-ink-strong: #2b2b2b;
-  --color-ink-soft: #4a4a4a;
-  --color-ink-muted: #5c5c5c;
-  --color-ink-faint: #a0a0a0;
+  --color-sunken: #f1f1f3;
+  --color-line: #e9e9ec;
+  --color-line-strong: #d8d8dd;
 
-  --color-timeline-1: #4a4a4a;
-  --color-timeline-2: #7e7e7e;
-  --color-timeline-3: #9d9d9d;
-  --color-timeline-profile: #2b2b2b;
-  --color-timeline-empty: #e2e2e2;
+  --color-ink: #17181b;
+  --color-ink-strong: #0e0f11;
+  --color-ink-soft: #43454b;
+  --color-ink-muted: #6a6d75;
+  --color-ink-faint: #9b9ea6;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+  --color-accent: #2354e6;
+  --color-accent-hover: #1b45c4;
+  --color-accent-soft: #eef2fe;
+  --color-accent-line: #c7d4fb;
+
+  --color-correct: #15803d;
+  --color-correct-soft: #eaf6ee;
+  --color-wrong: #b42318;
+  --color-wrong-soft: #fdeceb;
+  --color-flag: #b45309;
+  --color-flag-soft: #fdf3e6;
+  --color-answered: #e5e5ea;
+
+  --color-timeline-1: #6a6d75;
+  --color-timeline-2: #9b9ea6;
+  --color-timeline-3: #c3c5cb;
+  --color-timeline-profile: #2354e6;
+  --color-timeline-empty: #e9e9ec;
+
+  --font-sans: var(--font-golos-text), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geologica), var(--font-golos-text), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --shadow-card: 0 1px 2px rgba(16, 17, 26, 0.04);
+  --shadow-raised: 0 1px 2px rgba(16, 17, 26, 0.06), 0 18px 40px -16px rgba(16, 17, 26, 0.22);
+  --shadow-thumb: 0 1px 2px rgba(16, 17, 26, 0.1);
+
+  --animate-enter: enter 240ms var(--ease-out) both;
+  --animate-fade: fade 160ms var(--ease-out) both;
+  --animate-panel: panel 200ms var(--ease-out) both;
+  --animate-spin-fast: spin 600ms linear infinite;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes panel {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }
 
 html {
@@ -31,5 +81,75 @@ body {
   background-color: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.press,
+.press-tight {
+  transition-property: transform, color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 140ms;
+  transition-timing-function: var(--ease-out);
+}
+
+.press:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+
+.press-tight:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.94);
+}
+
+.stagger > * {
+  animation: var(--animate-enter);
+}
+
+.stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 120ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 160ms;
+}
+.stagger > *:nth-child(n + 6) {
+  animation-delay: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press,
+  .press-tight {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+  }
+
+  .press:active,
+  .press-tight:active {
+    transform: none;
+  }
+
+  .stagger > * {
+    animation: var(--animate-fade);
+    animation-delay: 0ms;
+  }
+
+
+  [data-motion] {
+    animation: var(--animate-fade);
+  }
 }
