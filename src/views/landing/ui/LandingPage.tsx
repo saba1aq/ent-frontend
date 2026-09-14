@@ -3,7 +3,9 @@ import Link from "next/link";
 
 import { SessionNavLink } from "@/entities/session";
 import { routes } from "@/shared/config/routes";
-import { Button, Logo, PageContainer, SectionLabel, Surface } from "@/shared/ui";
+
+import { ProductTour } from "./ProductTour";
+import { Button, Logo, PageContainer } from "@/shared/ui";
 
 const FACTS = [
   { value: "120", label: "вопросов в варианте" },
@@ -11,23 +13,6 @@ const FACTS = [
   { value: "5", label: "предметов: три обязательных и два профильных" },
 ];
 
-const STEPS = [
-  {
-    number: "01",
-    title: "Соберите вариант",
-    text: "Три обязательных предмета уже в варианте. Выберите пару профильных и язык, на котором будете сдавать.",
-  },
-  {
-    number: "02",
-    title: "Решите как на ЕНТ",
-    text: "120 вопросов, 4 часа, без паузы. Ответы сохраняются автоматически — можно вернуться к отмеченным.",
-  },
-  {
-    number: "03",
-    title: "Разберите ошибки",
-    text: "После теста — баллы по блокам, карта ответов и объяснение к каждому вопросу, где вы ошиблись.",
-  },
-];
 
 const CONTACTS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/nurym-zhanserik/" },
@@ -70,21 +55,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-4 pb-6">
-        <SectionLabel as="h2">Как это работает</SectionLabel>
-        <div className="stagger grid gap-3 sm:grid-cols-3">
-          {STEPS.map((step) => (
-            <Surface key={step.number} className="flex flex-col gap-3 p-5 sm:p-6">
-              <div className="flex items-center gap-3">
-                <SectionLabel>{step.number}</SectionLabel>
-                <span className="h-px flex-1 bg-line" />
-              </div>
-              <h3 className="font-display text-[17px] font-medium tracking-[-0.3px] text-ink">{step.title}</h3>
-              <p className="text-[13px]/[21px] text-ink-muted">{step.text}</p>
-            </Surface>
-          ))}
-        </div>
-      </section>
+      <ProductTour />
 
       <footer className="mt-auto flex flex-col gap-4 border-t border-line py-7 sm:flex-row sm:items-center sm:justify-between">
         <nav className="flex items-center gap-6">
