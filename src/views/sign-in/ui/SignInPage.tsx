@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import { signIn, useSessionStatus } from "@/entities/session";
 import { ApiError } from "@/shared/api";
 import { routes, withNext } from "@/shared/config/routes";
-import { Button, Checkbox, FormError, NarrowFormLayout, PasswordField, TextField } from "@/shared/ui";
+import { isPhoneComplete, phoneToE164 } from "@/shared/lib/phone";
+import { Button, Checkbox, FormError, NarrowFormLayout, PasswordField, PhoneField } from "@/shared/ui";
 
 type SignInPageProps = {
   next: string;
@@ -30,10 +31,14 @@ export function SignInPage({ next }: SignInPageProps) {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!isPhoneComplete(phone)) {
+      setError("Введите номер полностью — 10 цифр после +7.");
+      return;
+    }
     setError(null);
     setIsSubmitting(true);
     try {
-      await signIn(phone, password, remember);
+      await signIn(phoneToE164(phone), password, remember);
       router.replace(next);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось войти. Попробуйте ещё раз.");
@@ -61,14 +66,10 @@ export function SignInPage({ next }: SignInPageProps) {
       </div>
 
       <form onSubmit={submit} className="flex flex-col gap-5">
-        <TextField
+        <PhoneField
           label="Номер телефона"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="+7 701 234 56 78"
           value={phone}
-          onChange={(event) => setPhone(event.target.value)}
+          onChange={setPhone}
           required
         />
         <PasswordField

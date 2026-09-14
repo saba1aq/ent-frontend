@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -9,7 +9,7 @@ import { routes } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/cn";
 import { pluralize } from "@/shared/lib/format";
 import { showToast } from "@/shared/lib/toast-store";
-import { Button, SectionLabel, Segmented, Spinner, Surface } from "@/shared/ui";
+import { Button, PageContainer, SectionLabel, Segmented, Spinner, Surface } from "@/shared/ui";
 
 import { fetchLeaderboard } from "../api/leaderboard-api";
 import type { Leaderboard, LeaderboardPeriod, LeaderboardRow } from "../model/types";
@@ -58,23 +58,17 @@ export function LeaderboardPage() {
   const isMeListed = rows.some((row) => row.isMe);
 
   return (
-    <main className="mx-auto flex w-full max-w-[1100px] flex-col gap-7 px-5 py-7 lg:px-8 lg:py-9">
+    <PageContainer>
       <header className="animate-enter flex flex-col gap-6">
-        <div className="flex flex-wrap items-end justify-between gap-5">
-          <div className="flex flex-col gap-2">
-            <SectionLabel>Рейтинг</SectionLabel>
-            <h1 className="font-display text-[32px] leading-none font-medium tracking-[-0.9px] text-ink-strong lg:text-[40px]">
-              Кто впереди
-            </h1>
-            <p className="max-w-[560px] text-[15px]/[24px] text-ink-muted">
-              Место в рейтинге считается по лучшему баллу за выбранный период. Серия — сколько дней подряд вы
-              завершаете пробники.
-            </p>
-          </div>
-          <Button as={Link} href={routes.examSetup}>
-            Сдать пробник
-            <ArrowRight className="size-4" aria-hidden />
-          </Button>
+        <div className="flex flex-col gap-2">
+          <SectionLabel>Рейтинг</SectionLabel>
+          <h1 className="font-display text-[32px] leading-none font-medium tracking-[-0.9px] text-ink-strong lg:text-[40px]">
+            Кто впереди
+          </h1>
+          <p className="max-w-[560px] text-[15px]/[24px] text-ink-muted">
+            Место в рейтинге считается по лучшему баллу за выбранный период. Серия — сколько дней подряд вы завершаете
+            пробники.
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -98,13 +92,13 @@ export function LeaderboardPage() {
         <Surface className="flex flex-col items-start gap-5 p-6 sm:p-9">
           <p className="max-w-[520px] text-base/7 text-ink-soft">{EMPTY_TEXTS[period]}</p>
           <Button as={Link} href={routes.examSetup} size="lg">
-            Собрать вариант
+            Новый пробник
           </Button>
         </Surface>
       ) : (
         <LeaderboardTable rows={rows} />
       )}
-    </main>
+    </PageContainer>
   );
 }
 
@@ -113,7 +107,7 @@ function MyPlace({ row, isListed }: { row: LeaderboardRow; isListed: boolean }) 
     <Surface className="animate-enter flex flex-wrap items-center gap-x-10 gap-y-5 p-5 ring-accent-line sm:px-7">
       <div className="flex flex-col gap-1">
         <SectionLabel>Ваше место</SectionLabel>
-        <p className="font-display text-[28px] leading-none font-medium tracking-[-0.6px] text-accent">#{row.rank}</p>
+        <p className="font-display text-[28px] leading-none font-medium tracking-[-0.6px] text-ink">#{row.rank}</p>
       </div>
       <Stat label="Лучший балл" value={`${row.bestScore} / ${row.maxScore || 140}`} />
       <Stat label="Средний балл" value={String(row.averageScore)} />
@@ -143,25 +137,33 @@ function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {
             {rows.map((row) => (
               <tr
                 key={row.rank}
-                className={cn("border-b border-line last:border-b-0", row.isMe ? "bg-accent-soft/60" : null)}
+                className={cn(
+                  "border-b border-line last:border-b-0",
+                  row.isMe
+                    ? "[&>td]:bg-accent-soft [&>td:first-child]:shadow-[inset_3px_0_0_0_var(--color-accent)]"
+                    : null,
+                )}
               >
-                <td className="py-4 pl-6">
-                  <RankBadge rank={row.rank} isMe={row.isMe} />
+                <td className={cn("py-4 pl-6 text-sm font-semibold", row.isMe ? "text-accent-strong" : "text-ink-faint")}>
+                  {row.rank}
                 </td>
                 <td className="py-4 pr-4">
-                  <span className={cn("text-sm", row.isMe ? "font-semibold text-accent" : "font-medium text-ink")}>
+                  <span className={cn("text-sm", row.isMe ? "font-semibold text-ink-strong" : "font-medium text-ink")}>
                     {row.displayName}
                   </span>
-                  {row.isMe ? <span className="ml-2 text-[12px] text-accent">это вы</span> : null}
                 </td>
-                <td className="py-4 pr-4 text-right text-sm font-medium text-ink">
+                <td className={cn("py-4 pr-4 text-right text-sm", row.isMe ? "font-semibold text-ink-strong" : "font-medium text-ink")}>
                   {row.bestScore}
-                  <span className="text-ink-faint"> / {row.maxScore || 140}</span>
+                  <span className="font-normal text-ink-faint"> / {row.maxScore || 140}</span>
                 </td>
-                <td className="py-4 pr-4 text-right text-[13px] text-ink-muted">{row.averageScore}</td>
-                <td className="py-4 pr-4 text-right text-[13px] text-ink-muted">{row.attemptCount}</td>
+                <td className={cn("py-4 pr-4 text-right text-[13px]", row.isMe ? "text-ink-soft" : "text-ink-muted")}>
+                  {row.averageScore}
+                </td>
+                <td className={cn("py-4 pr-4 text-right text-[13px]", row.isMe ? "text-ink-soft" : "text-ink-muted")}>
+                  {row.attemptCount}
+                </td>
                 <td className="py-4 pr-6 text-right">
-                  <StreakBadge days={row.streakDays} />
+                  <StreakBadge days={row.streakDays} isMe={row.isMe} />
                 </td>
               </tr>
             ))}
@@ -174,21 +176,29 @@ function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {
           <Surface
             key={row.rank}
             as="li"
-            className={cn("flex flex-col gap-3 p-4", row.isMe ? "ring-accent-line" : null)}
+            className={cn(
+              "flex flex-col gap-3 p-4",
+              row.isMe ? "border-l-[3px] border-accent bg-accent-soft ring-accent-line" : null,
+            )}
           >
             <div className="flex items-center gap-3">
-              <RankBadge rank={row.rank} isMe={row.isMe} />
-              <span className={cn("flex-1 text-sm", row.isMe ? "font-semibold text-accent" : "font-medium text-ink")}>
+              <span className={cn("text-sm font-semibold", row.isMe ? "text-accent-strong" : "text-ink-faint")}>{row.rank}</span>
+              <span className={cn("flex-1 text-sm", row.isMe ? "font-semibold text-ink-strong" : "font-medium text-ink")}>
                 {row.displayName}
               </span>
-              <StreakBadge days={row.streakDays} />
+              <StreakBadge days={row.streakDays} isMe={row.isMe} />
             </div>
-            <div className="flex items-center justify-between gap-3 border-t border-line pt-3 text-[13px]">
-              <span className="text-ink">
+            <div
+              className={cn(
+                "flex items-center justify-between gap-3 border-t pt-3 text-[13px]",
+                row.isMe ? "border-accent-line" : "border-line",
+              )}
+            >
+              <span className={row.isMe ? "text-white" : "text-ink"}>
                 {row.bestScore}
-                <span className="text-ink-faint"> / {row.maxScore || 140}</span>
+                <span className="font-normal text-ink-faint"> / {row.maxScore || 140}</span>
               </span>
-              <span className="text-ink-muted">средний {row.averageScore}</span>
+              <span className={row.isMe ? "text-ink-soft" : "text-ink-muted"}>средний {row.averageScore}</span>
               <span className="text-ink-faint">
                 {row.attemptCount} {pluralize(row.attemptCount, ["пробник", "пробника", "пробников"])}
               </span>
@@ -200,30 +210,13 @@ function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {
   );
 }
 
-function RankBadge({ rank, isMe }: { rank: number; isMe: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 text-[13px] font-semibold ring-1",
-        isMe
-          ? "bg-accent text-white ring-accent"
-          : rank <= 3
-            ? "bg-answered text-ink-strong ring-line-strong"
-            : "bg-surface text-ink-muted ring-line-strong",
-      )}
-    >
-      {rank}
-    </span>
-  );
-}
-
-function StreakBadge({ days }: { days: number }) {
+function StreakBadge({ days, isMe }: { days: number; isMe: boolean }) {
   if (days === 0) {
     return <span className="text-[13px] text-ink-faint">—</span>;
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[13px] font-medium text-ink">
-      <Flame className="size-3.5 text-ink-muted" aria-hidden />
+    <span className={cn("inline-flex items-center gap-1 text-[13px]", isMe ? "font-semibold text-ink-strong" : "font-medium text-ink")}>
+      <Flame className={cn("size-3.5", isMe ? "text-accent" : "text-ink-muted")} aria-hidden />
       {days} {pluralize(days, ["день", "дня", "дней"])}
     </span>
   );

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { AttemptHistoryItem } from "@/entities/attempt";
+import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/cn";
 import { formatHoursMinutes, formatShortDate, pluralize } from "@/shared/lib/format";
@@ -15,12 +16,15 @@ type AttemptsTableProps = {
 };
 
 function title(item: AttemptHistoryItem): string {
-  return `Пробное ЕНТ №${item.number}`;
+  const profile = item.subjects.filter((subject) => subject.kind === "profile");
+  if (profile.length === 0) {
+    return `Пробное ЕНТ №${item.number}`;
+  }
+  return profile.map((subject) => subject.shortName[UI_LANGUAGE]).join(" и ");
 }
 
-function subjectsLabel(item: AttemptHistoryItem): string {
-  const subjects = item.subjects.length;
-  return `${subjects} ${pluralize(subjects, ["предмет", "предмета", "предметов"])} · ${item.questionCount} ${pluralize(item.questionCount, ["вопрос", "вопроса", "вопросов"])}`;
+function questionsLabel(item: AttemptHistoryItem): string {
+  return `${item.questionCount} ${pluralize(item.questionCount, ["вопрос", "вопроса", "вопросов"])}`;
 }
 
 function timeLabel(item: AttemptHistoryItem): string {
@@ -46,10 +50,10 @@ export function AttemptsTable({ items }: AttemptsTableProps) {
                 <SectionLabel as="span">Дата</SectionLabel>
               </th>
               <th className="px-4 py-3.5 font-normal">
-                <SectionLabel as="span">Тест</SectionLabel>
+                <SectionLabel as="span">Профильные предметы</SectionLabel>
               </th>
               <th className="px-4 py-3.5 font-normal">
-                <SectionLabel as="span">Предметы</SectionLabel>
+                <SectionLabel as="span">Вопросов</SectionLabel>
               </th>
               <th className="px-4 py-3.5 text-right font-normal">
                 <SectionLabel as="span">Баллы</SectionLabel>
@@ -71,7 +75,7 @@ export function AttemptsTable({ items }: AttemptsTableProps) {
                 <tr
                   key={item.id}
                   onClick={() => router.push(link.href)}
-                  className="cursor-pointer border-b border-line transition-colors duration-150 ease-out last:border-b-0 hover:bg-canvas"
+                  className="cursor-pointer border-b border-line transition-colors duration-150 ease-out last:border-b-0 hover:bg-sunken"
                 >
                   <td className="px-6 py-4 text-[13px] whitespace-nowrap text-ink-muted">
                     {formatShortDate(item.startedAt)}
@@ -81,7 +85,7 @@ export function AttemptsTable({ items }: AttemptsTableProps) {
                       <span className="text-sm font-medium text-ink">{title(item)}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-[13px] text-ink-faint">{subjectsLabel(item)}</td>
+                  <td className="px-4 py-4 text-[13px] text-ink-faint">{questionsLabel(item)}</td>
                   <td className="px-4 py-4 text-right text-[13px] whitespace-nowrap">
                     {isActive ? (
                       <span className="text-ink-faint">—</span>
@@ -137,7 +141,7 @@ export function AttemptsTable({ items }: AttemptsTableProps) {
                 <span className="ml-auto text-xs text-ink-faint">{formatShortDate(item.startedAt)}</span>
               </div>
 
-              <p className="text-[13px] text-ink-faint">{subjectsLabel(item)}</p>
+              <p className="text-[13px] text-ink-faint">{questionsLabel(item)}</p>
 
               <div className="flex items-center justify-between gap-3 border-t border-line pt-3 text-[13px]">
                 <span className={isActive ? "text-ink-faint" : "text-ink"}>

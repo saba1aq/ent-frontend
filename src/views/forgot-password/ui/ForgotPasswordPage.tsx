@@ -10,7 +10,8 @@ import { PhoneCodeStep } from "@/features/phone-verification";
 import { ApiError } from "@/shared/api";
 import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes } from "@/shared/config/routes";
-import { Button, FormError, NarrowFormLayout, PasswordField, SectionLabel, TextField } from "@/shared/ui";
+import { isPhoneComplete, phoneToE164 } from "@/shared/lib/phone";
+import { Button, FormError, NarrowFormLayout, PasswordField, PhoneField, SectionLabel } from "@/shared/ui";
 
 type Step = { name: "phone" } | { name: "code"; request: CodeRequestResult } | { name: "password"; token: string };
 
@@ -32,10 +33,14 @@ export function ForgotPasswordPage() {
 
   const requestCode = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!isPhoneComplete(phone)) {
+      setError("Введите номер полностью — 10 цифр после +7.");
+      return;
+    }
     setError(null);
     setIsBusy(true);
     try {
-      setStep({ name: "code", request: await requestPhoneCode(phone, "password_reset", UI_LANGUAGE) });
+      setStep({ name: "code", request: await requestPhoneCode(phoneToE164(phone), "password_reset", UI_LANGUAGE) });
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось отправить код.");
     } finally {
@@ -51,7 +56,7 @@ export function ForgotPasswordPage() {
     setError(null);
     setIsBusy(true);
     try {
-      await resetPasswordAndSignIn(phone, step.token, password);
+      await resetPasswordAndSignIn(phoneToE164(phone), step.token, password);
       router.replace(routes.examSetup);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось сменить пароль.");
@@ -90,14 +95,10 @@ export function ForgotPasswordPage() {
 
       {step.name === "phone" ? (
         <form onSubmit={requestCode} className="flex flex-col gap-5">
-          <TextField
+          <PhoneField
             label="Номер телефона"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            placeholder="+7 701 234 56 78"
             value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            onChange={setPhone}
             hint="Код действует 5 минут. Отправка бесплатна."
             required
           />
@@ -110,7 +111,7 @@ export function ForgotPasswordPage() {
 
       {step.name === "code" ? (
         <PhoneCodeStep
-          phone={phone}
+          phone={phoneToE164(phone)}
           purpose="password_reset"
           request={step.request}
           onVerified={(token) => setStep({ name: "password", token })}

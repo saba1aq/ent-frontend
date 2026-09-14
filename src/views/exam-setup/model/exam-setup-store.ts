@@ -9,6 +9,7 @@ const STORAGE_KEY = "ent.exam-setup";
 export type StoredExamSetup = {
   language: Language;
   profileSubjects: string[];
+  pending?: boolean;
 };
 
 const listeners = new Set<() => void>();
@@ -30,6 +31,7 @@ function parse(raw: string | null): StoredExamSetup | null {
     return {
       language: parsed.language,
       profileSubjects: parsed.profileSubjects.filter((code): code is string => typeof code === "string"),
+      pending: parsed.pending === true,
     };
   } catch {
     return null;
@@ -65,6 +67,38 @@ function write(setup: StoredExamSetup): void {
     memoryFallback = raw;
   }
   listeners.forEach((listener) => listener());
+}
+
+function clear(): void {
+  memoryFallback = null;
+  try {
+    window.sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    memoryFallback = null;
+  }
+  listeners.forEach((listener) => listener());
+}
+
+export function savePendingExamSetup(setup: StoredExamSetup): void {
+  write({ ...setup, pending: true });
+}
+
+let consumedAt = 0;
+
+export function consumePendingExamSetup(): void {
+  if (Date.now() - consumedAt < 1000) {
+    return;
+  }
+  consumedAt = Date.now();
+  const stored = parse(getSnapshot());
+  if (!stored) {
+    return;
+  }
+  if (stored.pending) {
+    write({ language: stored.language, profileSubjects: stored.profileSubjects });
+    return;
+  }
+  clear();
 }
 
 export function useStoredExamSetup(): [StoredExamSetup | null, (setup: StoredExamSetup) => void] {

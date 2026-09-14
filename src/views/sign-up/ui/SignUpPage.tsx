@@ -10,7 +10,8 @@ import { PhoneCodeStep } from "@/features/phone-verification";
 import { ApiError } from "@/shared/api";
 import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes, withNext } from "@/shared/config/routes";
-import { Button, FormError, NarrowFormLayout, PasswordField, SectionLabel, TextField } from "@/shared/ui";
+import { isPhoneComplete, phoneToE164 } from "@/shared/lib/phone";
+import { Button, FormError, NarrowFormLayout, PasswordField, PhoneField, SectionLabel, TextField } from "@/shared/ui";
 
 type SignUpPageProps = {
   next: string;
@@ -23,23 +24,29 @@ const STEP_NUMBERS: Record<Step["name"], number> = { phone: 1, code: 2, password
 const STEP_SUBTITLES: Record<Step["name"], string | null> = {
   phone: "Укажите номер телефона — отправим SMS с кодом подтверждения.",
   code: null,
-  password: "Номер подтверждён. Придумайте пароль для входа.",
+  password: "Номер подтверждён. Осталось представиться и придумать пароль.",
 };
 
 export function SignUpPage({ next }: SignUpPageProps) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [step, setStep] = useState<Step>({ name: "phone" });
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
   const requestCode = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!isPhoneComplete(phone)) {
+      setError("Введите номер полностью — 10 цифр после +7.");
+      return;
+    }
     setError(null);
     setIsBusy(true);
     try {
-      setStep({ name: "code", request: await requestPhoneCode(phone, "registration", UI_LANGUAGE) });
+      setStep({ name: "code", request: await requestPhoneCode(phoneToE164(phone), "registration", UI_LANGUAGE) });
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось отправить код.");
     } finally {
@@ -55,7 +62,14 @@ export function SignUpPage({ next }: SignUpPageProps) {
     setError(null);
     setIsBusy(true);
     try {
-      await signUp({ phone, password, verificationToken: step.token, language: UI_LANGUAGE });
+      await signUp({
+        phone: phoneToE164(phone),
+        password,
+        verificationToken: step.token,
+        language: UI_LANGUAGE,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
       router.replace(next);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось завершить регистрацию.");
@@ -85,14 +99,10 @@ export function SignUpPage({ next }: SignUpPageProps) {
 
       {step.name === "phone" ? (
         <form onSubmit={requestCode} className="flex flex-col gap-5">
-          <TextField
+          <PhoneField
             label="Номер телефона"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            placeholder="+7 701 234 56 78"
             value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            onChange={setPhone}
             hint="Код действует 5 минут. Отправка бесплатна."
             required
           />
@@ -105,7 +115,7 @@ export function SignUpPage({ next }: SignUpPageProps) {
 
       {step.name === "code" ? (
         <PhoneCodeStep
-          phone={phone}
+          phone={phoneToE164(phone)}
           purpose="registration"
           request={step.request}
           onVerified={(token) => setStep({ name: "password", token })}
@@ -115,6 +125,29 @@ export function SignUpPage({ next }: SignUpPageProps) {
 
       {step.name === "password" ? (
         <form onSubmit={complete} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <TextField
+              label="Имя"
+              autoComplete="given-name"
+              placeholder="Жадыра"
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
+              maxLength={40}
+              className="min-w-0 flex-1"
+              required
+            />
+            <TextField
+              label="Фамилия"
+              autoComplete="family-name"
+              placeholder="Нурымовна"
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
+              maxLength={40}
+              className="min-w-0 flex-1"
+              required
+            />
+          </div>
+          <p className="-mt-3 text-xs text-ink-faint">Имя и фамилию увидят другие ученики в рейтинге.</p>
           <PasswordField
             label="Пароль"
             autoComplete="new-password"
@@ -125,7 +158,7 @@ export function SignUpPage({ next }: SignUpPageProps) {
             required
           />
           <FormError message={error} />
-          <Button type="submit" size="lg" loading={isBusy} disabled={password.length < 8} className="w-full">
+          <Button type="submit" size="lg" loading={isBusy} disabled={password.length < 8 || firstName.trim().length < 2 || lastName.trim().length < 2} className="w-full">
             Создать аккаунт
           </Button>
         </form>

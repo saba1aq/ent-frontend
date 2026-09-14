@@ -2,7 +2,7 @@ export const LANGUAGES = ["kk", "ru"] as const;
 
 export type Language = (typeof LANGUAGES)[number];
 
-export const DEFAULT_LANGUAGE: Language = "ru";
+export const DEFAULT_TEST_LANGUAGE: Language = "kk";
 
 export const UI_LANGUAGE: Language = "ru";
 

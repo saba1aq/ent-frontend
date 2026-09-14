@@ -60,13 +60,13 @@ export function NavPanel({
               aria-current={isCurrent ? "true" : undefined}
               className={cn(
                 "press flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors duration-150 ease-out",
-                isCurrent ? "bg-accent-soft" : "hover:bg-sunken",
+                isCurrent ? "bg-accent" : "hover:bg-sunken",
               )}
             >
-              <span className={cn("flex-1 truncate text-[13px]", isCurrent ? "font-medium text-accent" : "text-ink-soft")}>
+              <span className={cn("flex-1 truncate text-[13px]", isCurrent ? "font-semibold text-white" : "text-ink-soft")}>
                 {section.subject.shortName[UI_LANGUAGE]}
               </span>
-              <span className={cn("text-xs", isCurrent ? "text-accent" : isDone ? "text-ink-soft" : "text-ink-faint")}>
+              <span className={cn("text-xs", isCurrent ? "font-semibold text-white" : isDone ? "text-ink-soft" : "text-ink-faint")}>
                 {section.answeredCount}/{section.questionCount}
               </span>
             </button>

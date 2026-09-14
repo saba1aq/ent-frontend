@@ -2,15 +2,15 @@ import type { QuestionNav } from "@/entities/attempt";
 import { cn } from "@/shared/lib/cn";
 
 export const QUESTION_STATE_CLASSES = {
-  current: "bg-accent text-white font-medium ring-1 ring-accent",
-  flagged: "bg-surface text-ink-strong font-semibold ring-[1.5px] ring-ink hover:bg-canvas",
+  current: "bg-accent text-white font-semibold ring-1 ring-accent",
+  flagged: "bg-surface text-ink-strong font-semibold ring-[1.5px] ring-ink hover:bg-sunken",
   answered: "bg-answered text-ink-strong font-medium ring-1 ring-line-strong hover:bg-line-strong",
   unanswered: "bg-surface text-ink-muted font-medium ring-1 ring-line-strong hover:bg-sunken",
 } as const;
 
 export const QUESTION_FLAG_CLASSES = {
-  on: "bg-surface text-ink-strong font-semibold ring-[1.5px] ring-ink hover:bg-canvas",
-  off: "bg-surface text-ink-soft font-medium ring-1 ring-line-strong hover:bg-canvas",
+  on: "bg-surface text-ink-strong font-semibold ring-[1.5px] ring-ink hover:bg-sunken",
+  off: "bg-surface text-ink-soft font-medium ring-1 ring-line-strong hover:bg-sunken",
 } as const;
 
 export const QUESTION_LEGEND = [

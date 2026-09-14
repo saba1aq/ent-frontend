@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { type AttemptHistory, type AttemptHistoryItem, fetchAttemptHistory } from "@/entities/attempt";
-import { fetchStreak, type Streak, StreakCard } from "@/entities/streak";
 import { describeError, NotAuthenticatedError } from "@/shared/api";
 import { routes } from "@/shared/config/routes";
 import { pluralize } from "@/shared/lib/format";
 import { showToast } from "@/shared/lib/toast-store";
-import { Button, SectionLabel, Spinner, Surface } from "@/shared/ui";
+import { Button, PageContainer, PageState, SectionLabel, Surface } from "@/shared/ui";
 
 import { AttemptsTable } from "./AttemptsTable";
 import { HistorySummary } from "./HistorySummary";
@@ -20,7 +19,6 @@ export function ExamHistoryPage() {
   const [items, setItems] = useState<AttemptHistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [streak, setStreak] = useState<Streak | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,13 +37,6 @@ export function ExamHistoryPage() {
         showToast(message);
         setError(message);
       });
-    fetchStreak()
-      .then((loaded) => {
-        if (!cancelled) {
-          setStreak(loaded);
-        }
-      })
-      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
@@ -77,18 +68,7 @@ export function ExamHistoryPage() {
 
   if (!history) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md items-center justify-center p-6">
-        {error ? (
-          <p role="alert" className="text-center text-sm text-wrong">
-            {error}
-          </p>
-        ) : (
-          <p className="flex items-center gap-2.5 text-sm text-ink-muted">
-            <Spinner className="text-ink-faint" />
-            Загружаем пробники…
-          </p>
-        )}
-      </main>
+<PageState tone={error ? "error" : "loading"} message={error ?? "Загружаем пробники…"} />
     );
   }
 
@@ -96,7 +76,7 @@ export function ExamHistoryPage() {
   const hasMore = items.length < history.totalCount;
 
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-5 py-8 lg:px-10">
+    <PageContainer>
       <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
         <div className="flex flex-col gap-2">
           <SectionLabel>История</SectionLabel>
@@ -104,34 +84,23 @@ export function ExamHistoryPage() {
             Мои пробники
           </h1>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Button as={Link} href={routes.leaderboard} variant="secondary">
-            Рейтинг
+        {active === null ? null : (
+          <Button as={Link} href={routes.exam(active)}>
+            Продолжить пробник
           </Button>
-          {active === null ? (
-            <Button as={Link} href={routes.examSetup}>
-              Собрать новый вариант
-            </Button>
-          ) : (
-            <Button as={Link} href={routes.exam(active)}>
-              Продолжить текущий экзамен
-            </Button>
-          )}
-        </div>
+        )}
       </header>
-
-      {streak ? <StreakCard streak={streak} /> : null}
 
       <HistorySummary summary={history.summary} />
 
       {items.length === 0 ? (
         <Surface className="flex flex-col items-start gap-5 p-6 sm:p-9">
           <p className="max-w-[520px] text-base/7 text-ink-soft">
-            Пока ни одного пробника. Соберите вариант — три обязательных предмета уже в нём, останется выбрать два
+            Пока ни одного пробника. Соберите свой — три обязательных предмета уже внутри, останется выбрать два
             профильных.
           </p>
           <Button as={Link} href={routes.examSetup} size="lg">
-            Собрать вариант
+            Новый пробник
           </Button>
         </Surface>
       ) : (
@@ -155,6 +124,6 @@ export function ExamHistoryPage() {
           ) : null}
         </>
       )}
-    </main>
+    </PageContainer>
   );
 }

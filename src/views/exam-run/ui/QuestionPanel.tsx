@@ -85,7 +85,7 @@ export function QuestionPanel({
                         "flex w-full cursor-pointer items-center gap-3.5 rounded-md px-4 py-[15px] text-left transition-colors duration-150 ease-out",
                         isSelected
                           ? "bg-accent-soft ring-2 ring-accent"
-                          : "bg-surface ring-1 ring-line-strong hover:bg-canvas",
+                          : "bg-surface ring-1 ring-line-strong hover:bg-sunken",
                       )}
                     >
                       <SelectBubble state={isSelected ? "selected" : "idle"} />

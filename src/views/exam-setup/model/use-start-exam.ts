@@ -9,6 +9,8 @@ import { ApiError } from "@/shared/api";
 import type { Language } from "@/shared/config/language";
 import { routes, withNext } from "@/shared/config/routes";
 
+import { savePendingExamSetup } from "./exam-setup-store";
+
 export function useStartExam(language: Language, profileCodes: readonly string[]) {
   const router = useRouter();
   const status = useSessionStatus();
@@ -18,6 +20,7 @@ export function useStartExam(language: Language, profileCodes: readonly string[]
   const start = async () => {
     setError(null);
     if (status !== "authenticated") {
+      savePendingExamSetup({ language, profileSubjects: [...profileCodes] });
       router.push(withNext(routes.signIn, routes.examSetup));
       return;
     }

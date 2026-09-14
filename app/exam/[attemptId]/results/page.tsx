@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import { RequireSession } from "@/entities/session";
 import { ExamResultsPage } from "@/views/exam-results";
 
 export const metadata: Metadata = { title: "Результаты" };
@@ -12,8 +11,6 @@ type PageProps = {
 export default async function Page({ params }: PageProps) {
   const { attemptId } = await params;
   return (
-    <RequireSession>
       <ExamResultsPage attemptId={attemptId} />
-    </RequireSession>
   );
 }

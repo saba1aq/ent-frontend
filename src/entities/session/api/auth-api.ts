@@ -51,6 +51,7 @@ export async function signUpRequest(input: {
   verificationToken: string;
   language: Language;
   firstName?: string;
+  lastName?: string;
 }): Promise<AuthResult> {
   const dto = await apiRequest<AuthResultDto>("/api/v1/auth/sign-up/", {
     method: "POST",
@@ -60,6 +61,7 @@ export async function signUpRequest(input: {
       verification_token: input.verificationToken,
       language: input.language,
       first_name: input.firstName ?? "",
+      last_name: input.lastName ?? "",
     },
   });
   return toAuthResult(dto);

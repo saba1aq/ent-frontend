@@ -3,6 +3,8 @@ export const routes = {
   examSetup: "/exam/setup",
   exams: "/exams",
   leaderboard: "/leaderboard",
+  topics: "/topics",
+  topic: (slug: string) => `/topics/${slug}`,
   signIn: "/auth/sign-in",
   signUp: "/auth/sign-up",
   forgotPassword: "/auth/forgot-password",

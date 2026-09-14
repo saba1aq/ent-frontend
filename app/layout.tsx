@@ -20,8 +20,8 @@ const geologica = Geologica({
 });
 
 export const metadata: Metadata = {
-  title: "Тренажёр ЕНТ",
-  description: "Тренажёр ЕНТ: реальные задания и разбор ошибок",
+  title: "upstudy — подготовка к ЕНТ",
+  description: "upstudy: пробное ЕНТ с реальными заданиями и разбором каждой ошибки",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
