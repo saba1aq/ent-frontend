@@ -1,36 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #f6f6f7;
+  --color-canvas: #ffffff;
   --color-surface: #ffffff;
-  --color-sunken: #f1f1f3;
-  --color-line: #e9e9ec;
-  --color-line-strong: #d8d8dd;
+  --color-sunken: #f5f3ef;
+  --color-line: #e6e2dc;
+  --color-line-strong: #d3cec6;
 
-  --color-ink: #17181b;
-  --color-ink-strong: #0e0f11;
-  --color-ink-soft: #43454b;
-  --color-ink-muted: #6a6d75;
-  --color-ink-faint: #9b9ea6;
+  --color-ink: #0c2e44;
+  --color-ink-strong: #071e2e;
+  --color-ink-soft: #3b5a70;
+  --color-ink-muted: #55738a;
+  --color-ink-faint: #8a9fae;
 
-  --color-accent: #2354e6;
-  --color-accent-hover: #1b45c4;
-  --color-accent-soft: #eef2fe;
-  --color-accent-line: #c7d4fb;
+  --color-accent: #ff5f00;
+  --color-accent-strong: #ae3704;
+  --color-accent-hover: #e85500;
+  --color-accent-soft: #fff0e6;
+  --color-accent-line: #ffd0b3;
 
-  --color-correct: #15803d;
-  --color-correct-soft: #eaf6ee;
-  --color-wrong: #b42318;
-  --color-wrong-soft: #fdeceb;
-  --color-flag: #b45309;
-  --color-flag-soft: #fdf3e6;
-  --color-answered: #e5e5ea;
+  --color-highlight: #fffac2;
 
-  --color-timeline-1: #6a6d75;
-  --color-timeline-2: #9b9ea6;
-  --color-timeline-3: #c3c5cb;
-  --color-timeline-profile: #2354e6;
-  --color-timeline-empty: #e9e9ec;
+  --color-correct: #1b7a4b;
+  --color-correct-soft: #e7f3ec;
+  --color-wrong: #c62828;
+  --color-wrong-soft: #fcebea;
+  --color-flag: #7a5a0f;
+  --color-flag-soft: #fffac2;
+  --color-answered: #e6e2dc;
+
+  --color-timeline-1: #55738a;
+  --color-timeline-2: #8a9fae;
+  --color-timeline-3: #bfcbd4;
+  --color-timeline-profile: #ff5f00;
+  --color-timeline-empty: #e6e2dc;
 
   --font-sans: var(--font-golos-text), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-geologica), var(--font-golos-text), ui-sans-serif, system-ui, sans-serif;
@@ -89,9 +92,24 @@ body {
   background-color: var(--color-accent-soft);
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-ink);
+  caret-color: var(--color-ink);
+  transition: background-color 100000s ease-out 0s;
+}
+
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-accent-strong);
   outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
 }
 
 .press,

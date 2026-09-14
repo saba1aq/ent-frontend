@@ -2,7 +2,7 @@ import { useId } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
-type TextFieldProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "id" | "className"> & {
+type TextFieldProps = Omit<React.ComponentPropsWithRef<"input">, "id" | "className"> & {
   label: string;
   hint?: string;
   error?: string | null;

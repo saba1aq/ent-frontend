@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { UI_LANGUAGE } from "@/shared/config/language";
+import { PageContainer, PageState } from "@/shared/ui";
 import { useExamRun } from "../model/use-exam-run";
 import { AnswersOverviewModal } from "./AnswersOverviewModal";
 import { NavPanel } from "./NavPanel";
@@ -13,16 +16,23 @@ type ExamRunPageProps = {
 export function ExamRunPage({ attemptId }: ExamRunPageProps) {
   const exam = useExamRun(attemptId);
 
+  useEffect(() => {
+    const confirmLeave = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", confirmLeave);
+    return () => window.removeEventListener("beforeunload", confirmLeave);
+  }, []);
+
   if (!exam.overview) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md items-center p-6">
-        <p className="w-full text-center text-sm text-ink-faint">Загружаем вариант…</p>
-      </main>
+      <PageState message="Загружаем вариант…" />
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-start">
+    <PageContainer width="wide" className="gap-6 lg:flex-row lg:items-start">
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <QuestionPanel
           detail={exam.currentDetail}
@@ -60,6 +70,6 @@ export function ExamRunPage({ attemptId }: ExamRunPageProps) {
           onFinish={exam.finish}
         />
       ) : null}
-    </main>
+    </PageContainer>
   );
 }

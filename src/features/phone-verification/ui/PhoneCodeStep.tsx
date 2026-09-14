@@ -5,7 +5,8 @@ import { useState } from "react";
 import { type CodeRequestResult, requestPhoneCode, verifyPhoneCode, type VerificationPurpose } from "@/entities/session";
 import { ApiError } from "@/shared/api";
 import { UI_LANGUAGE } from "@/shared/config/language";
-import { Button, FormError, TextField } from "@/shared/ui";
+import { formatPhone, phoneDigits } from "@/shared/lib/phone";
+import { Button, CodeField, FormError } from "@/shared/ui";
 
 import { useCountdown } from "../model/use-countdown";
 
@@ -29,7 +30,7 @@ export function PhoneCodeStep({ phone, purpose, request, onVerified, onChangePho
     setError(null);
     setIsBusy(true);
     try {
-      const result = await verifyPhoneCode(phone, code.trim(), purpose);
+      const result = await verifyPhoneCode(phone, code, purpose);
       onVerified(result.verificationToken);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось проверить код.");
@@ -54,7 +55,7 @@ export function PhoneCodeStep({ phone, purpose, request, onVerified, onChangePho
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <p className="text-sm/[22px] text-ink-muted">
-        Код отправлен на <span className="font-medium text-ink">{current.phone}</span>.{" "}
+        Код отправлен на <span className="font-medium text-ink">{formatPhone(phoneDigits(phone))}</span>.{" "}
         <button
           type="button"
           onClick={onChangePhone}
@@ -64,22 +65,17 @@ export function PhoneCodeStep({ phone, purpose, request, onVerified, onChangePho
         </button>
       </p>
 
-      <TextField
+      <CodeField
         label="Код из SMS"
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        placeholder="123456"
         value={code}
-        onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 8))}
+        onChange={setCode}
         hint={current.debugCode ? `Код для разработки: ${current.debugCode}` : "Код действует 5 минут."}
-        required
-        className="[&_input]:text-[22px] [&_input]:font-medium [&_input]:tracking-[0.34em]"
       />
 
       <FormError message={error} />
 
       <div className="flex flex-col items-center gap-1">
-        <Button type="submit" size="lg" loading={isBusy} disabled={code.length < 4} className="w-full">
+        <Button type="submit" size="lg" loading={isBusy} disabled={code.length < 6} className="w-full">
           Подтвердить
         </Button>
         <Button variant="quiet" size="sm" onClick={resend} disabled={isBusy || resendIn > 0}>

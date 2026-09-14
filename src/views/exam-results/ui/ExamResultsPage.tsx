@@ -1,15 +1,16 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { type AttemptResults, fetchResults } from "@/entities/attempt";
-import { fetchStreak, type Streak, StreakCard } from "@/entities/streak";
 import { ApiError, describeError, NotAuthenticatedError } from "@/shared/api";
 import { routes } from "@/shared/config/routes";
 import { formatHoursMinutes } from "@/shared/lib/format";
 import { showToast } from "@/shared/lib/toast-store";
-import { SectionLabel, Spinner } from "@/shared/ui";
+import { PageContainer, PageState, SectionLabel } from "@/shared/ui";
 
 import { AnswersMap } from "./AnswersMap";
 import { ResultsTable } from "./ResultsTable";
@@ -22,7 +23,6 @@ export function ExamResultsPage({ attemptId }: ExamResultsPageProps) {
   const router = useRouter();
   const [results, setResults] = useState<AttemptResults | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [streak, setStreak] = useState<Streak | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,13 +44,6 @@ export function ExamResultsPage({ attemptId }: ExamResultsPageProps) {
         showToast(message);
         setError(message);
       });
-    fetchStreak()
-      .then((loaded) => {
-        if (!cancelled) {
-          setStreak(loaded);
-        }
-      })
-      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
@@ -58,18 +51,7 @@ export function ExamResultsPage({ attemptId }: ExamResultsPageProps) {
 
   if (!results) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md items-center justify-center p-6">
-        {error ? (
-          <p role="alert" className="text-center text-sm text-wrong">
-            {error}
-          </p>
-        ) : (
-          <p className="flex items-center gap-2.5 text-sm text-ink-muted">
-            <Spinner className="text-ink-faint" />
-            Считаем результат…
-          </p>
-        )}
-      </main>
+      <PageState tone={error ? "error" : "loading"} message={error ?? "Считаем результат…"} />
     );
   }
 
@@ -79,8 +61,15 @@ export function ExamResultsPage({ attemptId }: ExamResultsPageProps) {
   const accuracyPercent = questionCount === 0 ? 0 : Math.round((correctCount / questionCount) * 100);
 
   return (
-    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-5 py-8 lg:px-10">
-      <header className="animate-enter flex flex-col gap-7">
+    <PageContainer>
+      <header className="animate-enter flex flex-col gap-5">
+        <Link
+          href={routes.exams}
+          className="press -mx-2.5 inline-flex w-fit items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors duration-150 ease-out hover:bg-sunken hover:text-ink-strong"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          Мои пробники
+        </Link>
         <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
           <div className="flex flex-col gap-2.5">
             <SectionLabel>{results.status === "expired" ? "Время вышло · результаты" : "Результаты"}</SectionLabel>
@@ -101,13 +90,11 @@ export function ExamResultsPage({ attemptId }: ExamResultsPageProps) {
         </div>
       </header>
 
-      {streak ? <StreakCard streak={streak} /> : null}
-
       <div className="stagger flex flex-col gap-4">
         <ResultsTable attemptId={results.id} sections={results.sections} />
         <AnswersMap attemptId={results.id} sections={results.sections} />
       </div>
-    </main>
+    </PageContainer>
   );
 }
 

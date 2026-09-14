@@ -6,8 +6,11 @@ export type AnswerStatus = "correct" | "wrong" | "empty";
 
 export type QuestionKind = "single" | "multiple";
 
+export type SubjectKind = "required" | "profile";
+
 export type SubjectBrief = {
   code: string;
+  kind: SubjectKind;
   name: Localized;
   shortName: Localized;
 };

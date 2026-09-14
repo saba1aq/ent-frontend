@@ -33,8 +33,8 @@ export function ProfileSubjectCard({ subject, uiLanguage, availability, onToggle
         "flex flex-col gap-3 rounded-lg p-4 text-left transition-colors duration-150 ease-out",
         isSelected && "press cursor-pointer bg-surface shadow-card ring-2 ring-accent",
         availability === "available" &&
-          "press cursor-pointer bg-surface shadow-card ring-1 ring-line-strong hover:bg-canvas",
-        isUnavailable && "cursor-not-allowed bg-transparent ring-1 ring-line",
+          "press cursor-pointer bg-surface shadow-card ring-1 ring-line-strong hover:bg-sunken",
+        isUnavailable && "cursor-not-allowed bg-sunken ring-1 ring-line",
       )}
     >
       <div className="flex items-start justify-between gap-3">

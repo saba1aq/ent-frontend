@@ -20,14 +20,14 @@ type ButtonProps<T extends React.ElementType> = ButtonOwnProps<T> &
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-white shadow-card hover:bg-accent-hover",
-  secondary: "bg-surface text-ink shadow-card ring-1 ring-line-strong hover:bg-canvas",
+  secondary: "bg-surface text-ink shadow-card ring-1 ring-line-strong hover:bg-sunken",
   ghost: "text-ink-soft ring-1 ring-transparent hover:bg-sunken",
   quiet: "text-ink-muted hover:text-ink",
 };
 
 const DISABLED_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-sunken text-ink-faint",
-  secondary: "bg-canvas text-ink-faint ring-1 ring-line",
+  secondary: "bg-sunken text-ink-faint ring-1 ring-line",
   ghost: "text-ink-faint",
   quiet: "text-ink-faint",
 };

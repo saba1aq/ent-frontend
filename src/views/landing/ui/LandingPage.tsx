@@ -1,9 +1,9 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { SessionNavLink } from "@/entities/session";
 import { routes } from "@/shared/config/routes";
-import { Button, SectionLabel, Surface } from "@/shared/ui";
+import { Button, Logo, PageContainer, SectionLabel, Surface } from "@/shared/ui";
 
 const FACTS = [
   { value: "120", label: "вопросов в варианте" },
@@ -29,11 +29,16 @@ const STEPS = [
   },
 ];
 
+const CONTACTS = [
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/nurym-zhanserik/" },
+  { label: "Telegram", href: "https://t.me/saba1aq" },
+];
+
 export function LandingPage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col px-5 py-6 lg:px-10">
+    <PageContainer className="min-h-screen">
       <header className="flex items-center justify-between gap-4">
-        <span className="font-display text-xl font-medium tracking-[-0.4px] text-ink">Тренажёр ЕНТ</span>
+        <Logo size="md" />
         <SessionNavLink />
       </header>
 
@@ -50,7 +55,7 @@ export function LandingPage() {
 
         <div className="flex flex-col gap-9">
           <Button as={Link} href={routes.examSetup} size="lg" className="w-fit">
-            Собрать вариант
+            Начать пробник
             <ArrowRight className="size-4" aria-hidden />
           </Button>
 
@@ -65,7 +70,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-4 pb-12">
+      <section className="flex flex-col gap-4 pb-6">
         <SectionLabel as="h2">Как это работает</SectionLabel>
         <div className="stagger grid gap-3 sm:grid-cols-3">
           {STEPS.map((step) => (
@@ -80,6 +85,23 @@ export function LandingPage() {
           ))}
         </div>
       </section>
-    </main>
+
+      <footer className="mt-auto flex flex-col gap-4 border-t border-line py-7 sm:flex-row sm:items-center sm:justify-between">
+        <nav className="flex items-center gap-6">
+          {CONTACTS.map((contact) => (
+            <a
+              key={contact.href}
+              href={contact.href}
+              target="_blank"
+              rel="noreferrer"
+              className="press inline-flex items-center gap-1 text-[13px] text-ink-muted transition-colors duration-150 ease-out hover:text-ink"
+            >
+              {contact.label}
+              <ArrowUpRight className="size-3.5" aria-hidden />
+            </a>
+          ))}
+        </nav>
+      </footer>
+    </PageContainer>
   );
 }

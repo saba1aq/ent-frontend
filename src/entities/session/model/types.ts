@@ -4,6 +4,7 @@ export type SessionUser = {
   id: number;
   phone: string;
   firstName: string;
+  lastName: string;
   language: Language;
   dateJoined: string;
 };

@@ -21,6 +21,8 @@ export async function signUp(input: {
   password: string;
   verificationToken: string;
   language: Language;
+  firstName?: string;
+  lastName?: string;
 }): Promise<SessionUser> {
   const result = await signUpRequest(input);
   writeTokens({ access: result.access, refresh: result.refresh }, "local");

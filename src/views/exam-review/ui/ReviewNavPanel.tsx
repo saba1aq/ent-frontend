@@ -45,10 +45,10 @@ export function ReviewNavPanel({ attemptId, results, currentSection, currentQues
                 isCurrent ? "bg-accent-soft" : "hover:bg-sunken",
               )}
             >
-              <span className={cn("flex-1 truncate text-[13px]", isCurrent ? "font-medium text-accent" : "text-ink-soft")}>
+              <span className={cn("flex-1 truncate text-[13px]", isCurrent ? "font-medium text-accent-strong" : "text-ink-soft")}>
                 {section.subject.shortName[UI_LANGUAGE]}
               </span>
-              <span className={cn("text-xs", isCurrent ? "text-accent" : "text-ink-faint")}>
+              <span className={cn("text-xs", isCurrent ? "text-accent-strong" : "text-ink-faint")}>
                 {section.correctCount}/{section.questionCount}
               </span>
             </Link>

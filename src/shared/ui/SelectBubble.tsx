@@ -13,7 +13,7 @@ const STATE_CLASSES: Record<SelectBubbleState, string> = {
   selected: "bg-accent ring-accent text-white",
   idle: "bg-surface ring-line-strong text-transparent",
   muted: "bg-transparent ring-line text-transparent",
-  fixed: "bg-ink-faint ring-ink-faint text-white",
+  fixed: "bg-ink-soft ring-ink-soft text-white",
 };
 
 export function SelectBubble({ state, className }: SelectBubbleProps) {

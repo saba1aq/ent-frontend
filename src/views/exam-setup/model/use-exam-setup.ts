@@ -1,18 +1,22 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { type ExamConfig, isPairAllowed, type Subject } from "@/entities/subject";
-import { DEFAULT_LANGUAGE, type Language } from "@/shared/config/language";
+import { DEFAULT_TEST_LANGUAGE, type Language } from "@/shared/config/language";
 
-import { useStoredExamSetup } from "./exam-setup-store";
+import { consumePendingExamSetup, useStoredExamSetup } from "./exam-setup-store";
 import { computeExamTotals, PROFILE_SUBJECT_SLOTS } from "./exam-totals";
 import type { SubjectAvailability } from "./types";
 
 export function useExamSetup(config: ExamConfig) {
   const [stored, save] = useStoredExamSetup();
 
-  const testLanguage = stored?.language ?? DEFAULT_LANGUAGE;
+  useEffect(() => {
+    consumePendingExamSetup();
+  }, []);
+
+  const testLanguage = stored?.language ?? DEFAULT_TEST_LANGUAGE;
 
   const selectedCodes = useMemo(() => {
     const knownCodes = new Set(config.profile.map((subject) => subject.code));
