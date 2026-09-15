@@ -5,6 +5,8 @@ export const routes = {
   leaderboard: "/leaderboard",
   topics: "/topics",
   topic: (slug: string) => `/topics/${slug}`,
+  billing: "/billing",
+  billingReturn: "/billing/return",
   signIn: "/auth/sign-in",
   signUp: "/auth/sign-up",
   forgotPassword: "/auth/forgot-password",

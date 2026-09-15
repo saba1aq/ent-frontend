@@ -1,4 +1,4 @@
-import { ArrowRight, Circle } from "lucide-react";
+import { ArrowRight, Circle, Lock } from "lucide-react";
 import Link from "next/link";
 
 import { routes } from "@/shared/config/routes";
@@ -6,10 +6,12 @@ import { cn } from "@/shared/lib/cn";
 import { pluralize } from "@/shared/lib/format";
 
 import type { DemoTopic } from "../model/demo";
+import { findNote } from "../model/notes";
 
 const MASTERY_SLOTS = [0, 1, 2, 3, 4];
 
 export function TopicRow({ topic }: { topic: DemoTopic }) {
+  const isLocked = Boolean(topic.slug) && findNote(topic.slug!)?.isFree === false;
   const content = (
     <>
       <Circle className="size-4 shrink-0 text-ink-faint" aria-hidden />
@@ -26,11 +28,20 @@ export function TopicRow({ topic }: { topic: DemoTopic }) {
       <span
         className={cn(
           "hidden w-[110px] shrink-0 items-center justify-end gap-1 text-[13px] font-medium sm:flex",
-          topic.slug ? "text-accent-strong" : "text-ink-muted",
+          isLocked ? "text-ink-faint" : topic.slug ? "text-accent-strong" : "text-ink-muted",
         )}
       >
-        {topic.slug ? "Конспект" : "Начать"}
-        <ArrowRight className="size-3.5" aria-hidden />
+        {isLocked ? (
+          <>
+            <Lock className="size-3.5" aria-hidden />
+            По подписке
+          </>
+        ) : (
+          <>
+            {topic.slug ? "Конспект" : "Начать"}
+            <ArrowRight className="size-3.5" aria-hidden />
+          </>
+        )}
       </span>
     </>
   );
@@ -42,7 +53,7 @@ export function TopicRow({ topic }: { topic: DemoTopic }) {
   return (
     <li>
       <Link
-        href={routes.topic(topic.slug)}
+        href={isLocked ? routes.billing : routes.topic(topic.slug)}
         className="press flex items-center gap-4 px-4 py-3.5 transition-colors duration-150 ease-out hover:bg-sunken sm:px-6"
       >
         {content}

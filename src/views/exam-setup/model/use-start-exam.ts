@@ -11,6 +11,8 @@ import { routes, withNext } from "@/shared/config/routes";
 
 import { savePendingExamSetup } from "./exam-setup-store";
 
+const PAYWALL_CODES = new Set(["quota_exceeded", "subscription_required"]);
+
 export function useStartExam(language: Language, profileCodes: readonly string[]) {
   const router = useRouter();
   const status = useSessionStatus();
@@ -29,6 +31,11 @@ export function useStartExam(language: Language, profileCodes: readonly string[]
       const attempt = await createAttempt(language, [...profileCodes]);
       router.push(routes.exam(attempt.id));
     } catch (caught) {
+      if (caught instanceof ApiError && PAYWALL_CODES.has(caught.code ?? "")) {
+        savePendingExamSetup({ language, profileSubjects: [...profileCodes] });
+        router.push(routes.billing);
+        return;
+      }
       if (caught instanceof ApiError && caught.code === "active_attempt_exists") {
         const active = (await listAttempts().catch(() => [])).find((item) => item.status === "in_progress");
         if (active) {

@@ -7,12 +7,14 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { fetchMe, type SessionUser, signOut } from "@/entities/session";
 import { fetchStreak, type Streak } from "@/entities/streak";
+import { type Entitlement, fetchEntitlement } from "@/entities/subscription";
 import { routes } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/cn";
 import { Logo, LogoMark } from "@/shared/ui";
 
 import { NAV_ITEMS } from "../model/nav-items";
 import { getSidebarCollapsed, getSidebarCollapsedServer, subscribeSidebar, toggleSidebar } from "../model/sidebar-store";
+import { SidebarPlan } from "./SidebarPlan";
 import { SidebarStreak } from "./SidebarStreak";
 import { SidebarUser } from "./SidebarUser";
 
@@ -22,6 +24,7 @@ export function AppSidebar() {
   const isCollapsed = useSyncExternalStore(subscribeSidebar, getSidebarCollapsed, getSidebarCollapsedServer);
   const [streak, setStreak] = useState<Streak | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +39,13 @@ export function AppSidebar() {
       .then((loaded) => {
         if (!cancelled) {
           setUser(loaded);
+        }
+      })
+      .catch(() => undefined);
+    fetchEntitlement()
+      .then((loaded) => {
+        if (!cancelled) {
+          setEntitlement(loaded);
         }
       })
       .catch(() => undefined);
@@ -121,6 +131,7 @@ export function AppSidebar() {
 
       <div className={cn("mt-auto flex flex-col gap-3", isCollapsed ? "items-center" : null)}>
         {streak ? <SidebarStreak streak={streak} isCollapsed={isCollapsed} /> : null}
+        {entitlement ? <SidebarPlan entitlement={entitlement} isCollapsed={isCollapsed} /> : null}
         <div className={cn("w-full border-t border-line pt-4", isCollapsed ? "flex justify-center" : null)}>
           <SidebarUser user={user} isCollapsed={isCollapsed} onSignOut={leave} />
         </div>

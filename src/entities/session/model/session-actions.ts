@@ -23,6 +23,7 @@ export async function signUp(input: {
   language: Language;
   firstName?: string;
   lastName?: string;
+  referralCode?: string;
 }): Promise<SessionUser> {
   const result = await signUpRequest(input);
   writeTokens({ access: result.access, refresh: result.refresh }, "local");

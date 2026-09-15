@@ -10,6 +10,11 @@ const CODE_MESSAGES: Record<string, string> = {
   verification_cooldown: "Код уже отправлен, запросите новый чуть позже.",
   verification_attempts_exceeded: "Слишком много попыток ввода кода, запросите новый.",
   invalid_code: "Неверный код из SMS.",
+  quota_exceeded: "На бесплатном тарифе доступен один пробник в месяц.",
+  subscription_required: "Это доступно по подписке.",
+  promo_not_applicable: "Промокод не подходит.",
+  plan_not_available: "Этот тариф сейчас недоступен.",
+  payment_provider_error: "Платёжная система не отвечает. Попробуйте позже.",
 };
 
 const STATUS_MESSAGES: Record<number, string> = {

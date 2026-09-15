@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geologica, Golos_Text } from "next/font/google";
 
-import { ToastViewport } from "@/shared/ui";
+import { ReferralCapture, ToastViewport } from "@/shared/ui";
 
 import "./globals.css";
 
@@ -29,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className={`${golosText.variable} ${geologica.variable}`}>
       <body>
         {children}
+        <ReferralCapture />
         <ToastViewport />
       </body>
     </html>

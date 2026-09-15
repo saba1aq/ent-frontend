@@ -11,6 +11,7 @@ import { ApiError } from "@/shared/api";
 import { UI_LANGUAGE } from "@/shared/config/language";
 import { routes, withNext } from "@/shared/config/routes";
 import { isPhoneComplete, phoneToE164 } from "@/shared/lib/phone";
+import { clearReferralCode, readReferralCode } from "@/shared/lib/referral";
 import { Button, FormError, NarrowFormLayout, PasswordField, PhoneField, SectionLabel, TextField } from "@/shared/ui";
 
 type SignUpPageProps = {
@@ -69,7 +70,9 @@ export function SignUpPage({ next }: SignUpPageProps) {
         language: UI_LANGUAGE,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        referralCode: readReferralCode(),
       });
+      clearReferralCode();
       router.replace(next);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Не удалось завершить регистрацию.");

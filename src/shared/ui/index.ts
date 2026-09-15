@@ -9,6 +9,7 @@ export { PageContainer } from "./PageContainer";
 export { PageState } from "./PageState";
 export { PasswordField } from "./PasswordField";
 export { PhoneField } from "./PhoneField";
+export { ReferralCapture } from "./ReferralCapture";
 export { SectionLabel } from "./SectionLabel";
 export { Segmented } from "./Segmented";
 export { SelectBubble } from "./SelectBubble";

@@ -52,6 +52,7 @@ export async function signUpRequest(input: {
   language: Language;
   firstName?: string;
   lastName?: string;
+  referralCode?: string;
 }): Promise<AuthResult> {
   const dto = await apiRequest<AuthResultDto>("/api/v1/auth/sign-up/", {
     method: "POST",
@@ -62,6 +63,7 @@ export async function signUpRequest(input: {
       language: input.language,
       first_name: input.firstName ?? "",
       last_name: input.lastName ?? "",
+      referral_code: input.referralCode ?? "",
     },
   });
   return toAuthResult(dto);

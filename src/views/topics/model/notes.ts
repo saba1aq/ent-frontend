@@ -4,6 +4,7 @@ export type TopicNote = {
   section: string;
   questionCount: number;
   readingMinutes: number;
+  isFree: boolean;
   summary: string;
   blocks: Array<{ heading: string; paragraphs: string[] }>;
   keyFacts: string[];
@@ -12,6 +13,7 @@ export type TopicNote = {
 export const TOPIC_NOTES: TopicNote[] = [
   {
     slug: "tyurkskiy-kaganat",
+    isFree: true,
     name: "Тюркский каганат",
     section: "Средневековые государства",
     questionCount: 24,
@@ -58,6 +60,7 @@ export const TOPIC_NOTES: TopicNote[] = [
   },
   {
     slug: "karahanidy-i-kypchaki",
+    isFree: false,
     name: "Караханиды и кыпчаки",
     section: "Средневековые государства",
     questionCount: 20,
@@ -88,6 +91,7 @@ export const TOPIC_NOTES: TopicNote[] = [
   },
   {
     slug: "mongolskoe-nashestvie",
+    isFree: false,
     name: "Монгольское нашествие",
     section: "Средневековые государства",
     questionCount: 18,
