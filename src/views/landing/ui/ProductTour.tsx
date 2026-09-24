@@ -4,7 +4,8 @@ import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/shared/lib/cn";
-import { SectionLabel } from "@/shared/ui";
+
+import { SectionHeading } from "./SectionHeading";
 
 type Chapter = {
   at: number;
@@ -111,13 +112,12 @@ export function ProductTour() {
   };
 
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <SectionLabel as="h2">Как это работает</SectionLabel>
-        <p className="max-w-[560px] text-[15px]/[24px] text-ink-muted">
-          Запись настоящего продукта — от регистрации до разбора ошибок. Нажмите на шаг, чтобы перейти к нему.
-        </p>
-      </div>
+    <section id="tour" className="flex scroll-mt-6 flex-col gap-8">
+      <SectionHeading
+        label="Как это работает"
+        title="Как это выглядит внутри"
+        text="Запись настоящего продукта — от выбора предметов до разбора ошибок. Нажмите на шаг, чтобы перейти к нему."
+      />
 
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
         <div className="relative min-w-0 flex-1 overflow-hidden rounded-xl bg-sunken shadow-card ring-1 ring-line">

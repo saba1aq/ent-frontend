@@ -3,10 +3,10 @@
 import { Button, Surface } from "@/shared/ui";
 
 type ErrorPageProps = {
-  reset: () => void;
+  retry: () => void;
 };
 
-export default function ExamSetupError({ reset }: ErrorPageProps) {
+export default function ExamSetupError({ retry }: ErrorPageProps) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md items-center justify-center p-5">
       <div data-motion className="animate-enter w-full">
@@ -17,7 +17,7 @@ export default function ExamSetupError({ reset }: ErrorPageProps) {
           <p className="text-[13px]/5 text-ink-muted">
             Сервер не ответил. Проверьте, что бэкенд запущен, и попробуйте ещё раз.
           </p>
-          <Button variant="secondary" onClick={reset} className="self-start">
+          <Button variant="secondary" onClick={() => retry()} className="self-start">
             Повторить
           </Button>
         </Surface>
